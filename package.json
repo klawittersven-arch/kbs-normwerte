@@ -1,0 +1,13 @@
+{
+  "name": "kbs-normwerte",
+  "version": "1.0.0",
+  "private": true,
+  "description": "KBS Normwert-Blitz – Normwerte-Spiel (Vitalzeichen und Laborwerte) mit Klassenmodus",
+  "type": "module",
+  "scripts": {
+    "start": "node server/local.mjs",
+    "test": "node --test tests/inhalt.test.mjs tests/room.test.mjs",
+    "e2e": "node tests/e2e.mjs",
+    "deploy": "npx wrangler deploy"
+  }
+}

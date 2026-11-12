@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="author" content="Sven Klawitter">
+<meta name="theme-color" content="#0d1030">
+<meta name="description" content="Normwerte-Spiel für die Pflegeausbildung: Vitalzeichen und Laborwerte erkennen – zu niedrig, normal oder zu hoch?">
+<title>KBS Normwert-Blitz</title>
+<link rel="icon" href="img/logo.png">
+<link rel="stylesheet" href="css/normwerte.css">
+</head>
+<body class="handy">
+<main class="app">
+  <header class="top">
+    <h1 class="brand">KBS <span>Normwert-Blitz</span></h1>
+  </header>
+
+  <section class="panel" id="panel" aria-live="polite"></section>
+
+  <section class="spielfeld" id="spielfeld" hidden>
+    <div class="statuszeile">
+      <div class="runde" id="sRunde"></div>
+      <div class="herzen" id="sLeben"></div>
+      <div class="hinweis" id="sText" aria-live="polite"></div>
+      <button class="stopp" id="btnStop" aria-label="Spiel beenden">✕</button>
+    </div>
+    <div class="zeitbalken" id="sBarBox"><i id="sBar"></i></div>
+    <div class="wertfeld" id="wertfeld">
+      <div class="wertkarte" id="wertkarte"><div class="wertname" id="wName"></div><div class="geraet" id="geraet"></div></div>
+      <div class="feedback" id="feedback" hidden></div>
+    </div>
+    <div class="wischhilfe" aria-hidden="true"><span>◀ wischen</span><span>▲ wischen</span><span>wischen ▶</span></div>
+    <div class="antworten" id="antworten"></div>
+  </section>
+
+  <div class="countdown" id="countdown" hidden><div><b id="cdNum">3</b><small id="cdText"></small></div></div>
+</main>
+<script type="module" src="js/ueben.js"></script>
+</body>
+</html>

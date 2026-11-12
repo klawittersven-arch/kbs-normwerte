@@ -1,6 +1,6 @@
 # KBS Normwert-Blitz
 
-Ein Spiel für die ganze Klasse zu Normwerten (Vitalzeichen und Laborwerte, CE 02/05). Die SuS sehen Messwerte so, wie sie auf Station aussehen: am EKG-Monitor, am Pulsoximeter, am Blutdruckmessgerät, am Ohrthermometer, am Blutzuckermessgerät oder im Laborbefund. Sie entscheiden jedes Mal: **zu niedrig**, **normal** oder **zu hoch**? Das geht per Wischen oder Tippen. Erst spielen alle allein auf dem Handy (Qualifying). Dann spielen die Besten im Finale am Beamer gegeneinander, und alle anderen raten auf dem Handy mit.
+Ein Spiel für die ganze Klasse zu Normwerten (Vitalzeichen und Laborwerte, CE 02/05). Die SuS sehen Messwerte so, wie sie auf Station aussehen: am EKG-Monitor, am Pulsoximeter, am Blutdruckmessgerät, am Ohrthermometer, am Blutzuckermessgerät, an der Personenwaage (BMI) oder im Laborbefund. Sie entscheiden jedes Mal: **zu niedrig**, **normal** oder **zu hoch**? Das geht per Wischen oder Tippen. Erst spielen alle allein auf dem Handy (Qualifying). Dann spielen die Besten im Finale am Beamer gegeneinander, und alle anderen raten auf dem Handy mit.
 
 | Seite | Adresse | Für wen |
 |---|---|---|
@@ -40,7 +40,7 @@ Genauso wie bei KBS Simon says, KBS-Kart und Tetris:
 1. **Lehrer-Link am Laptop öffnen**, Beamer und Lautsprecher an, **F** für Vollbild. Oben rechts steht der Code der Sitzung.
 2. **Anmeldung:** Die SuS scannen den QR-Code und geben ihren Vornamen und den ersten Buchstaben des Nachnamens ein (z. B. „Lena K.“). Die Namen erscheinen am Beamer. Mit **×** entfernst du unpassende Namen.
 3. **Einstellungen** (unter den Namen, bleiben gespeichert):
-   - **Werte:** Vitalzeichen, Laborwerte oder beides. Voreingestellt sind nur die Vitalzeichen, alle Laborwerte sind abgewählt. Mit den kleinen Knöpfen darunter wählst du einzelne Werte an oder ab, z. B. nur HF, RR und SpO₂ für eine Einführungsstunde.
+   - **Werte:** Vitalzeichen, Laborwerte oder beides. Voreingestellt sind nur die Vitalzeichen, alle Laborwerte sind abgewählt. **BMI** ist eine Zusatzoption (gestrichelter Knopf): Er kommt nur vor, wenn du ihn anklickst, auch nicht über „Beides“. Mit den kleinen Knöpfen darunter wählst du einzelne Werte an oder ab, z. B. nur HF, RR und SpO₂ für eine Einführungsstunde.
    - **Stufe:** **Deutlich** (Werte liegen klar im Normbereich oder klar daneben) oder **Knapp** (Werte nah an der Grenze, z. B. AF 21/min oder Kalium 5,1 mmol/l).
    - **Finale:** mit 2, 3, 4, 6 oder 8 Personen.
    - **Leben:** 1, 2 oder 3 Leben im Finale.
@@ -107,6 +107,7 @@ Ein Eintrag sieht so aus:
 - **bereich**: kleinster und größter Wert, der im Spiel vorkommt.
 - **abstand**: In der Stufe „Deutlich“ liegen auffällige Werte mindestens so weit von der Grenze weg. In der Stufe „Knapp“ liegen sie höchstens so weit weg.
 - **niedrig** / **hoch**: Fachbegriff, der in der Auflösung erscheint.
+- **standard: false** (wahlweise): Der Wert ist am Beamer zunächst abgewählt und wird nur gespielt, wenn du ihn dort anklickst (so wie BMI).
 - Zahlen mit **Punkt** schreiben (`3.5`), im Spiel steht dann ein Komma (3,5).
 - Die `id` nicht ändern. Neue Werte: einen Eintrag kopieren, eine neue `id` vergeben (nur Kleinbuchstaben) und anpassen. Welche Geräte es gibt, steht oben in der Datei.
 
@@ -120,7 +121,7 @@ Ein Eintrag sieht so aus:
 | Atemfrequenz | 12–20/min | | Leukozyten | 4.000–10.000/µl |
 | Körpertemperatur | 36,3–37,4 °C | | Thrombozyten | 150.000–400.000/µl |
 | Blutzucker nüchtern | 70–100 mg/dl | | CRP | unter 5 mg/l |
-| | | | Kreatinin | 0,5–1,2 mg/dl |
+| BMI (Zusatzoption) | 18,5–24,9 kg/m² | | Kreatinin | 0,5–1,2 mg/dl |
 | | | | Quick | 70–130 % |
 
 Die Übungsseite zeigt unter **Normwerte ansehen** immer die aktuelle Liste aus der Datei.
@@ -158,7 +159,7 @@ Voraussetzung: Handys und Laptop sind im selben WLAN, und das WLAN erlaubt Verbi
 |---|---|
 | `public/js/normwerte.js` | ← die Normwerte (Normbereiche, Fachbegriffe, Gerät) |
 | `public/js/regeln.js` | Regeln, Zeiten, Prüfen der Normwerte-Datei, Erzeugen der Werte (gilt für Handys, Beamer und Server) |
-| `public/js/geraete.js` | Gerätedisplays als SVG (Monitor, Pulsoximeter, Blutdruckgerät, Thermometer, BZ-Gerät, Laborbefund) |
+| `public/js/geraete.js` | Gerätedisplays als SVG (Monitor, Pulsoximeter, Blutdruckgerät, Thermometer, BZ-Gerät, Personenwaage, Laborbefund) |
 | `public/js/antwort.js` | Antwortknöpfe und Wischen |
 | `public/js/spiel.js` | Spiel allein auf dem Handy (Qualifying und Üben) |
 | `public/js/ui.js` | Gemeinsame Anzeige-Bausteine (Auflösung, Herzen, Zeitbalken) |

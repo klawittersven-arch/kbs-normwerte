@@ -9,7 +9,7 @@ export const KATEGORIEN = ['niedrig', 'normal', 'hoch'];
 export const KAT_TEXT = { niedrig: 'zu niedrig', normal: 'normal', hoch: 'zu hoch' };
 export const KAT_ZEICHEN = { niedrig: '▼', normal: '●', hoch: '▲' };
 export const GRUPPEN = { vital: 'Vitalzeichen', labor: 'Laborwerte' };
-export const ANZEIGEN = ['ekg', 'atmung', 'spo2', 'rr', 'thermometer', 'bz', 'labor'];
+export const ANZEIGEN = ['ekg', 'atmung', 'spo2', 'rr', 'thermometer', 'bz', 'labor', 'waage'];
 
 export const STUFEN = ['deutlich', 'knapp'];
 export const STUFE_TEXT = {
@@ -62,6 +62,7 @@ export function pruefe(p) {
     if (!paarOk(p.normalFrau) || !paarOk(p.normalMann)) f.push('normalFrau und normalMann müssen beide so aussehen: [von, bis]');
   } else if (!paarOk(p.normal)) f.push('normal muss so aussehen: [von, bis]');
   if (!textOk(p.niedrig) || !textOk(p.hoch) || !textOk(p.normalText)) f.push('niedrig, hoch und normalText müssen Texte sein');
+  if (p.standard !== undefined && typeof p.standard !== 'boolean') f.push('standard muss true oder false sein (ohne Hochkommas)');
   if (p.anzeige === 'rr') {
     const d = p.dia;
     if (!d || !paarOk(d.normal) || !paarOk(d.bereich) || !zahlOk(d.abstand) || d.abstand <= 0) f.push('Blutdruck braucht dia: { normal: [von, bis], bereich: [von, bis], abstand: Zahl }');
@@ -93,8 +94,10 @@ export const INHALT_FEHLER = GEPRUEFT.fehler;    // wird am Beamer angezeigt
 const BY_ID = new Map(WERTE.map(p => [p.id, p]));
 export const wert = id => BY_ID.get(id) || null;
 export const alleIds = () => WERTE.map(p => p.id);
-// Voreinstellung am Beamer: nur Vitalzeichen. Laborwerte lassen sich dazuschalten.
-export const standardIds = () => { const v = WERTE.filter(p => p.gruppe === 'vital').map(p => p.id); return v.length ? v : alleIds(); };
+// Werte, die am Beamer über „Vitalzeichen“, „Laborwerte“ bzw. „Beides“ ausgewählt werden (ohne Zusatzoptionen mit standard: false)
+export const gruppenIds = g => WERTE.filter(p => (g === 'alle' || p.gruppe === g) && p.standard !== false).map(p => p.id);
+// Voreinstellung am Beamer: nur Vitalzeichen. Laborwerte und Zusatzoptionen (z. B. BMI) lassen sich dazuschalten.
+export const standardIds = () => { const v = gruppenIds('vital'); return v.length ? v : alleIds(); };
 
 // ------------------------------------------------------------------ Zahlen
 export function stellen(s) { const t = String(s); const i = t.indexOf('.'); return i < 0 ? 0 : t.length - i - 1; }

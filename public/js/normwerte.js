@@ -12,7 +12,7 @@
  *   anzeige   welches Gerät im Spiel erscheint:
  *             'ekg' (Monitor mit EKG), 'atmung' (Monitor mit Atemkurve), 'spo2' (Pulsoximeter),
  *             'rr' (Blutdruckmessgerät), 'thermometer' (Ohrthermometer), 'bz' (Blutzuckermessgerät),
- *             'labor' (Laborbefund)
+ *             'labor' (Laborbefund), 'waage' (Personenwaage mit BMI-Anzeige)
  *   einheit   z. B. '/min', 'mmHg', '%'
  *   normal    Normbereich [von, bis]. Beide Grenzen zählen noch als „normal“.
  *   bereich   [kleinster, größter] Wert, der im Spiel vorkommen kann.
@@ -27,6 +27,7 @@
  *   Nur bei Bedarf:
  *   normalFrau, normalMann   statt „normal“: getrennte Normbereiche. Der Befund zeigt dann „Patientin“ oder „Patient“.
  *   normalText               so steht der Normbereich in der Auflösung, z. B. 'unter 5 mg/l'
+ *   standard: false          am Beamer zunächst abgewählt: Der Wert kommt nur vor, wenn du ihn dort dazuschaltest
  *   dia                      nur beim Blutdruck: Normbereich, Bereich und Abstand für den unteren (diastolischen) Wert
  *
  * Wichtig:
@@ -67,6 +68,12 @@ export const NORMWERTE = [
     id: 'bz', gruppe: 'vital', name: 'Blutzucker nüchtern', kurz: 'BZ', anzeige: 'bz', einheit: 'mg/dl',
     normal: [70, 100], bereich: [30, 350], abstand: 15, schritt: 1,
     niedrig: 'Hypoglykämie (Unterzucker)', hoch: 'Hyperglykämie (Überzucker)',
+  },
+  {
+    // Body-Mass-Index nach WHO (Erwachsene). Zusatzoption: am Beamer zunächst abgewählt.
+    id: 'bmi', gruppe: 'vital', name: 'Body-Mass-Index', kurz: 'BMI', anzeige: 'waage', einheit: 'kg/m²',
+    normal: [18.5, 24.9], bereich: [13.0, 45.0], abstand: 2, schritt: 0.1, standard: false,
+    niedrig: 'Untergewicht', hoch: 'Übergewicht (ab 30: Adipositas)',
   },
 
   // ------------------------------------------------------------------ Laborwerte (CE 05)

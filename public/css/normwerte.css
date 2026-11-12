@@ -227,6 +227,8 @@ body.beamer .chip{font-size:.72em}
 .wchips .glbl:not(:first-child){margin-left:.6em}
 .wchip{border:2px solid var(--line);background:transparent;color:var(--muted);font-weight:700;font-size:.85em;padding:.25em .6em;border-radius:2em;cursor:pointer}
 .wchip[aria-pressed="true"]{background:#2a2f6e;border-color:var(--k-normal);color:var(--text)}
+.wchip.extra{border-style:dashed}
+.wchip.extra[aria-pressed="true"]{border-style:solid}
 .empty{color:var(--muted)}
 
 /* Qualifying */

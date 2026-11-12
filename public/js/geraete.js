@@ -231,7 +231,38 @@ function laborbefund(item, p) {
 
 // Ausschnitt je Gerät (schmale Geräte werden so größer dargestellt)
 const AUSSCHNITT = { bz: '62 0 276 300', spo2: '0 20 400 268' };
-const GERAETE = { ekg: (i, p) => monitor(i, p, 'ekg'), atmung: (i, p) => monitor(i, p, 'atmung'), spo2: pulsoximeter, rr: blutdruck, thermometer, bz: bzGeraet, labor: laborbefund };
+function waage(item, p) {
+  const id = 'g' + (++uid);
+  const an = '#1d2719', aus = 'rgba(29,39,25,.07)', lab = 'font-weight="800" fill="#2b3526"';
+  const groesse = 155 + ((item.deko || 0) % 41);                         // cm
+  const kg = Math.round(item.w * (groesse / 100) ** 2 * 10) / 10;       // passend zum BMI
+  return `
+    <defs>
+      <linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d5dde6"/></linearGradient>
+      <linearGradient id="${id}s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8e98a3"/><stop offset=".5" stop-color="#c9d1d9"/><stop offset="1" stop-color="#8e98a3"/></linearGradient>
+    </defs>
+    <rect x="184" y="240" width="32" height="70" fill="url(#${id}s)"/>
+    <rect x="30" y="14" width="340" height="236" rx="26" fill="url(#${id}g)" stroke="#a9b3be" stroke-width="2.5"/>
+    <rect x="50" y="34" width="232" height="196" rx="12" fill="#c5d2bd" stroke="#93a287" stroke-width="3"/>
+    ${t(64, 62, 'GRÖSSE', `font-size="11" ${lab}`)}
+    ${seg7(groesse, 236, 46, 24, 3, an, aus)}
+    ${t(244, 68, 'cm', `font-size="12" ${lab}`)}
+    ${t(64, 104, 'GEWICHT', `font-size="11" ${lab}`)}
+    ${seg7(zahl(kg, 0.1, false), 236, 86, 26, 4, an, aus)}
+    ${t(244, 110, 'kg', `font-size="12" ${lab}`)}
+    <line x1="62" y1="124" x2="270" y2="124" stroke="#93a287" stroke-width="2"/>
+    ${t(64, 168, 'BMI', `font-size="24" ${lab}`)}
+    ${seg7(lcdZahl(item.w, p), 268, 136, 62, 3, an, aus)}
+    ${t(268, 220, 'kg/m²', `font-size="12" text-anchor="end" ${lab}`)}
+    <circle cx="326" cy="74" r="20" fill="#2f6fd6" stroke="#1f55a8" stroke-width="3"/>
+    ${t(326, 78, 'BMI', 'font-size="11" fill="#fff" text-anchor="middle" font-weight="800"')}
+    <circle cx="326" cy="140" r="15" fill="#dfe5eb" stroke="#a9b3be" stroke-width="2"/>
+    ${t(326, 143, 'TARA', 'font-size="8" fill="#55606c" text-anchor="middle" font-weight="800"')}
+    <circle cx="326" cy="194" r="15" fill="#dfe5eb" stroke="#a9b3be" stroke-width="2"/>
+    ${t(326, 197, 'HOLD', 'font-size="8" fill="#55606c" text-anchor="middle" font-weight="800"')}`;
+}
+
+const GERAETE = { waage, ekg: (i, p) => monitor(i, p, 'ekg'), atmung: (i, p) => monitor(i, p, 'atmung'), spo2: pulsoximeter, rr: blutdruck, thermometer, bz: bzGeraet, labor: laborbefund };
 
 // Das fertige SVG für einen Wert
 export function geraet(item) {

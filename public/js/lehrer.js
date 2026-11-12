@@ -2,7 +2,7 @@
 import { KNet, randomCode, randomId, store } from './net.js';
 import {
   WERTE, GRUPPEN, STUFEN, STUFE_TEXT, FINAL_GROESSEN, LEBEN_WAHL, LEBEN_QUALI, QUALI_WERTE, SUDDEN_DEATH_AB,
-  KAT_TEXT, KAT_ZEICHEN, INHALT_FEHLER, GNADE, zeitFinale, wert, alleIds, standardIds,
+  KAT_TEXT, KAT_ZEICHEN, INHALT_FEHLER, GNADE, zeitFinale, wert, alleIds, standardIds, gruppenIds,
 } from './regeln.js';
 import { Ton } from './ton.js';
 import { esc, herzenHTML, zeigeWert, zeitbalken, aufloesung, richtigText } from './ui.js';
@@ -119,7 +119,7 @@ function setCfg(part) {
     send({ t: 'final-pick', p: next });
   }
 }
-const gruppeIds = g => WERTE.filter(p => g === 'alle' || p.gruppe === g).map(p => p.id);
+const gruppeIds = gruppenIds;
 function werteWahl() {
   const set = new Set(cfg.ids);
   for (const g of ['vital', 'labor', 'alle']) { const ids = gruppeIds(g); if (ids.length === set.size && ids.every(id => set.has(id))) return g; }
@@ -146,7 +146,8 @@ function optionen(el, mitFinale) {
       const l = document.createElement('span'); l.className = 'glbl'; l.textContent = name + ':'; chipBox.appendChild(l);
       for (const p of WERTE.filter(x => x.gruppe === g)) {
         const b = document.createElement('button');
-        b.type = 'button'; b.className = 'wchip'; b.textContent = p.kurz; b.title = p.name;
+        b.type = 'button'; b.className = 'wchip' + (p.standard === false ? ' extra' : ''); b.textContent = p.kurz;
+        b.title = p.name + (p.standard === false ? ' (Zusatzoption: nur wenn hier ausgewählt)' : '');
         b.setAttribute('aria-pressed', String(cfg.ids.includes(p.id)));
         b.onclick = () => {
           const on = cfg.ids.includes(p.id);

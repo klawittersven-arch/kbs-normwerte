@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { NORMWERTE } from '../public/js/normwerte.js';
 import {
-  WERTE, INHALT_FEHLER, KATEGORIEN, aufgaben, erzeuge, kann, kategorie, normBereich, normalText, wertText,
+  WERTE, INHALT_FEHLER, KATEGORIEN, aufgaben, erzeuge, kann, kategorie, normBereich, normalText, wertText, standardIds, gruppenIds,
   zahl, rng, zeitQuali, zeitFinale, pruefe, QUALI_WERTE,
 } from '../public/js/regeln.js';
 
@@ -91,6 +91,24 @@ test('Deutsche Schreibweise', () => {
   assert.equal(normalText(BSP.k), '3,5–5,0 mmol/l');
   assert.equal(normalText(BSP.crp), 'unter 5 mg/l');
   assert.ok(!kann(BSP.spo2, 'hoch') && kann(BSP.spo2, 'niedrig') && !kann(BSP.crp, 'niedrig'));
+});
+
+test('Zusatzoptionen (standard: false) sind am Beamer zunächst abgewählt', () => {
+  for (const p of WERTE.filter(x => x.standard === false)) {
+    assert.ok(!standardIds().includes(p.id), p.name + ' darf nicht vorausgewählt sein');
+    assert.ok(!gruppenIds('alle').includes(p.id), p.name + ' gehört nicht zu „Beides“');
+  }
+  assert.ok(standardIds().every(id => WERTE.find(p => p.id === id).gruppe === 'vital' || !WERTE.some(p => p.gruppe === 'vital')));
+  assert.ok(pruefe({ ...BSP.af, standard: 'false' }).length, 'standard als Text wird erkannt');
+});
+
+test('Jeder Wert hat ein Gerätebild', async () => {
+  const { geraet } = await import('../public/js/geraete.js');
+  for (const p of WERTE) for (const x of aufgaben(3, [p.id], 'deutlich', 6)) {
+    const svg = geraet(x);
+    assert.ok(svg.startsWith('<svg') && svg.endsWith('</svg>') && svg.includes(wertText(x, p)), p.name + ': kein Gerätebild');
+    assert.ok(!/undefined|NaN/.test(svg), p.name + ': Gerätebild unvollständig');
+  }
 });
 
 test('Zeit pro Wert: großzügig und langsam schneller', () => {

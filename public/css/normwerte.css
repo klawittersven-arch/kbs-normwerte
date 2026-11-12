@@ -159,7 +159,7 @@ body.spielt .top{display:none}
 .fb-lang{display:flex;flex-direction:column;gap:12px;width:100%;max-width:30em}
 .fb-lang h3{margin:0;font-family:var(--f-display);font-weight:400;font-size:24px;color:var(--bad);text-align:center}
 .fb-lang .ghost-btn{align-self:center;min-width:9em}
-.feedback.ok .fb-lang h3{color:var(--ok)}
+.feedback.ok .fb-lang h3,.feedback.gut .fb-lang h3{color:var(--ok)}
 .wischhilfe{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--muted);padding:0 6px;opacity:.8}
 .antworten{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;flex:none}
 .ant{--k:#888;min-height:clamp(80px,16vh,140px);border-radius:16px;border:3px solid #3a4180;border-color:color-mix(in srgb,var(--k) 60%,#151a44);background:#22285a;background:color-mix(in srgb,var(--k) 22%,#151a44);color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 4px;cursor:pointer;touch-action:none;transition:transform .08s,background-color .12s,box-shadow .12s,opacity .2s}

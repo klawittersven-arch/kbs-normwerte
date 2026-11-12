@@ -79,6 +79,13 @@ try {
   await T.screenshot({ path: path.join(OUT, '01-beamer-lobby.png') });
   await phones.Lena.p.screenshot({ path: path.join(OUT, '02-handy-warten.png') });
 
+  // Voreinstellung: Vitalzeichen an, alle Laborwerte aus
+  const chips = await T.$$eval('#wchips', els => [...els[0].children].map(e => e.className === 'glbl' ? '|' + e.textContent : e.textContent + '=' + e.getAttribute('aria-pressed')).join(' '));
+  const [vitalChips, laborChips] = chips.split('|Laborwerte:');
+  if (!/=true/.test(vitalChips) || /=false/.test(vitalChips) || /=true/.test(laborChips)) throw new Error('Voreinstellung falsch: ' + chips);
+  if ((await T.getAttribute('.seg[aria-label="Werte"] button:has-text("Vitalzeichen")', 'aria-checked')) !== 'true') throw new Error('„Vitalzeichen“ nicht vorausgewählt');
+  log('Voreinstellung: nur Vitalzeichen ✓');
+
   // ---------------- Qualifying (alle Werte, Stufe „Deutlich“, Finale mit 4 Personen und 2 Leben)
   await T.click('.seg[aria-label="Werte"] button:has-text("Beides")');
   await T.click('.seg[aria-label="Leben im Finale"] button:has-text("2 Leben")');

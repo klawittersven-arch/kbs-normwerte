@@ -3,7 +3,7 @@
 // (src/worker.js für Cloudflare, server/local.mjs für den Laptop) reicht Verbindungen und Speicher herein.
 import {
   KATEGORIEN, STUFEN, FINAL_GROESSEN, LEBEN_WAHL, LEBEN_QUALI, QUALI_WERTE, FINALE_MAX, SUDDEN_DEATH_AB,
-  VORLAUF_START, VORLAUF_RUNDE, GNADE, zeitFinale, aufgaben, alleIds, vergleichQuali, zufallsSeed,
+  VORLAUF_START, VORLAUF_RUNDE, GNADE, zeitFinale, aufgaben, alleIds, standardIds, vergleichQuali, zufallsSeed,
 } from '../public/js/regeln.js';
 
 export const MAX_PLAYERS = 60;
@@ -30,7 +30,7 @@ export function cleanCfg(c, old) {
   const ids = v => Array.isArray(v) ? all.filter(id => v.includes(id)) : [];
   let w = ids(c.ids);
   if (!w.length) w = ids(old.ids);
-  if (!w.length) w = all;
+  if (!w.length) w = standardIds();
   return {
     ids: w,
     stufe: pick(c.stufe, STUFEN, pick(old.stufe, STUFEN, 'deutlich')),

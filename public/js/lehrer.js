@@ -2,7 +2,7 @@
 import { KNet, randomCode, randomId, store } from './net.js';
 import {
   WERTE, GRUPPEN, STUFEN, STUFE_TEXT, FINAL_GROESSEN, LEBEN_WAHL, LEBEN_QUALI, QUALI_WERTE, SUDDEN_DEATH_AB,
-  KAT_TEXT, KAT_ZEICHEN, INHALT_FEHLER, GNADE, zeitFinale, wert, alleIds,
+  KAT_TEXT, KAT_ZEICHEN, INHALT_FEHLER, GNADE, zeitFinale, wert, alleIds, standardIds,
 } from './regeln.js';
 import { Ton } from './ton.js';
 import { esc, herzenHTML, zeigeWert, zeitbalken, aufloesung, richtigText } from './ui.js';
@@ -12,9 +12,13 @@ const view = $('#view'), netdot = $('#netdot'), codeChip = $('#codeChip'), toast
 
 let sess = store('normwerte.lehrer');
 let net = null, room = null, screen = '';
-let cfg = Object.assign({ ids: alleIds(), stufe: 'deutlich', finalN: 4, leben: 3 }, store('normwerte.lehrer.cfg') || {});
-cfg.ids = Array.isArray(cfg.ids) ? alleIds().filter(id => cfg.ids.includes(id)) : alleIds();
-if (!cfg.ids.length) cfg.ids = alleIds();
+// Gespeicherte Einstellungen des Beamers. Voreinstellung: nur Vitalzeichen (Laborwerte abgewählt).
+// Ältere gespeicherte Auswahl (vor Version 2: alle Werte an) wird einmal auf die Voreinstellung zurückgesetzt.
+const gespeichert = store('normwerte.lehrer.cfg') || {};
+if (gespeichert.v !== 2) delete gespeichert.ids;
+let cfg = Object.assign({ ids: standardIds(), stufe: 'deutlich', finalN: 4, leben: 3 }, gespeichert, { v: 2 });
+cfg.ids = Array.isArray(cfg.ids) ? alleIds().filter(id => cfg.ids.includes(id)) : standardIds();
+if (!cfg.ids.length) cfg.ids = standardIds();
 if (!STUFEN.includes(cfg.stufe)) cfg.stufe = 'deutlich';
 if (!FINAL_GROESSEN.includes(cfg.finalN)) cfg.finalN = 4;
 if (!LEBEN_WAHL.includes(cfg.leben)) cfg.leben = 3;

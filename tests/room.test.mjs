@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { RoomLogic, werteRunde, cleanName, cleanCfg } from '../src/room.js';
-import { zeitFinale, GNADE, SUDDEN_DEATH_AB, KATEGORIEN, alleIds } from '../public/js/regeln.js';
+import { zeitFinale, GNADE, SUDDEN_DEATH_AB, KATEGORIEN, alleIds, standardIds, wert } from '../public/js/regeln.js';
 
 function makeRoom() {
   let t = 1_000_000, saved = null;
@@ -39,7 +39,8 @@ const ALLE = alleIds(), ZWEI = ALLE.slice(0, 2);
 
 test('Einstellungen: nur bekannte Werte, nie eine leere Auswahl', () => {
   assert.deepEqual(cleanCfg({ ids: [ZWEI[0], 'quatsch'] }).ids, [ZWEI[0]]);
-  assert.deepEqual(cleanCfg({ ids: [] }).ids, ALLE);
+  assert.deepEqual(cleanCfg({ ids: [] }).ids, standardIds());
+  assert.ok(cleanCfg({}).ids.every(id => wert(id).gruppe === 'vital'), 'Voreinstellung: nur Vitalzeichen');
   assert.deepEqual(cleanCfg({ ids: [] }, { ids: [ALLE[ALLE.length - 1]] }).ids, [ALLE[ALLE.length - 1]]);
   assert.equal(cleanCfg({ stufe: 'knapp', finalN: 8, leben: 1 }).finalN, 8);
   assert.equal(cleanCfg({ finalN: 5, leben: 7 }).leben, 3);

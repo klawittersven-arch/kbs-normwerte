@@ -40,7 +40,7 @@ Genauso wie bei KBS Simon says, KBS-Kart und Tetris:
 1. **Lehrer-Link am Laptop öffnen**, Beamer und Lautsprecher an, **F** für Vollbild. Oben rechts steht der Code der Sitzung.
 2. **Anmeldung:** Die SuS scannen den QR-Code und geben ihren Vornamen und den ersten Buchstaben des Nachnamens ein (z. B. „Lena K.“). Die Namen erscheinen am Beamer. Mit **×** entfernst du unpassende Namen.
 3. **Einstellungen** (unter den Namen, bleiben gespeichert):
-   - **Werte:** Vitalzeichen, Laborwerte oder beides. Mit den kleinen Knöpfen darunter wählst du einzelne Werte an oder ab, z. B. nur HF, RR und SpO₂ für eine Einführungsstunde.
+   - **Werte:** Vitalzeichen, Laborwerte oder beides. Voreingestellt sind nur die Vitalzeichen, alle Laborwerte sind abgewählt. Mit den kleinen Knöpfen darunter wählst du einzelne Werte an oder ab, z. B. nur HF, RR und SpO₂ für eine Einführungsstunde.
    - **Stufe:** **Deutlich** (Werte liegen klar im Normbereich oder klar daneben) oder **Knapp** (Werte nah an der Grenze, z. B. AF 21/min oder Kalium 5,1 mmol/l).
    - **Finale:** mit 2, 3, 4, 6 oder 8 Personen.
    - **Leben:** 1, 2 oder 3 Leben im Finale.

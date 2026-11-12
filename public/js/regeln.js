@@ -93,6 +93,8 @@ export const INHALT_FEHLER = GEPRUEFT.fehler;    // wird am Beamer angezeigt
 const BY_ID = new Map(WERTE.map(p => [p.id, p]));
 export const wert = id => BY_ID.get(id) || null;
 export const alleIds = () => WERTE.map(p => p.id);
+// Voreinstellung am Beamer: nur Vitalzeichen. Laborwerte lassen sich dazuschalten.
+export const standardIds = () => { const v = WERTE.filter(p => p.gruppe === 'vital').map(p => p.id); return v.length ? v : alleIds(); };
 
 // ------------------------------------------------------------------ Zahlen
 export function stellen(s) { const t = String(s); const i = t.indexOf('.'); return i < 0 ? 0 : t.length - i - 1; }

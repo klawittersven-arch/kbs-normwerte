@@ -316,6 +316,56 @@ try {
   await phones.Sara.p.screenshot({ path: path.join(OUT, '23-handy-sitzung-beendet.png') });
   await T.waitForFunction(c => !document.querySelector('#codeChip').textContent.includes(c), code, { timeout: 15000 });
   log('Sitzung gelöscht, Beamer hat einen neuen Code ✓');
+
+  // ---------------- Allein gegen den Computer (neue Sitzung, nur ein Handy)
+  await T.waitForSelector('#qr');
+  const code2 = (await T.textContent('#codeChip')).replace('Code ', '').trim();
+  const sctx = await browser.newContext({ viewport: { width: 390, height: 780 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
+  await sctx.addInitScript(vorbereiten);
+  const S = await sctx.newPage();
+  S.on('pageerror', e => errors.push('Solo: ' + e.message));
+  await S.goto(`${BASE}/mitspielen?c=${code2}`);
+  await S.fill('#fFirst', 'Nora'); await S.fill('#fInit', 'W'); await S.click('button[type=submit]');
+  await S.waitForSelector('.waitdots');
+  await T.waitForFunction(() => document.querySelectorAll('.name').length === 1);
+  await T.keyboard.press('Enter');
+  for (let n = 0; n < 3; n++) {
+    await offen(S);
+    const { kat } = await S.evaluate(() => window.__nwTest.solo);
+    await antworte(S, falsch(kat));
+    await S.waitForSelector('#fbWeiter', { timeout: 5000 }); await S.click('#fbWeiter', { force: true });
+  }
+  await T.waitForFunction(() => document.querySelector('#qCount') && document.querySelector('#qCount').textContent.startsWith('1/1'), null, { timeout: 15000 });
+  await T.keyboard.press('Enter');
+  await T.waitForSelector('#slots select');
+  const vorwahl = await T.$$eval('#slots select', els => els.map(e => e.value));
+  if (vorwahl[1] !== 'cpu-mittel') throw new Error('Computer nicht vorausgewählt: ' + vorwahl.join());
+  await T.locator('#slots select').nth(1).selectOption('cpu-leicht');
+  await T.click('.seg[aria-label="Leben im Finale"] button:has-text("1 Leben")');
+  await T.waitForFunction(() => document.querySelectorAll('#slots select')[1].value === 'cpu-leicht' && document.querySelectorAll('#slots .online.ja').length >= 2);
+  await sleep(300);
+  await T.screenshot({ path: path.join(OUT, '24-beamer-finale-computer-auswahl.png') });
+  await phones.Lena.p.close();
+  await T.keyboard.press('Enter');
+  let runden = 0;
+  for (let r = 1; r <= 25; r++) {
+    const weiter = await Promise.race([
+      T.waitForFunction(r => window.__nwTest.final && window.__nwTest.final.round === r, r, { timeout: 30000 }).then(() => true),
+      T.waitForSelector('.winner', { timeout: 30000 }).then(() => false),
+    ]);
+    if (!weiter) break;
+    runden = r;
+    const kat = await T.evaluate(() => window.__nwTest.final.kat);
+    await offen(S);
+    await antworte(S, kat);
+    if (r === 1) { await sleep(2500); await T.screenshot({ path: path.join(OUT, '25-beamer-finale-gegen-computer.png') }); }
+  }
+  await T.waitForSelector('.winner', { timeout: 30000 });
+  const p4 = await T.$$eval('.places li', els => els.map(e => e.textContent.trim()));
+  log('Allein gegen den Computer (leicht):', runden, 'Werte, Plätze', p4.join(' | '));
+  if (!p4[0].startsWith('1. Nora W.') || !p4[1].includes('Computer (leicht)')) throw new Error('Plätze (gegen Computer) falsch');
+  await S.waitForSelector('text=Du hast gewonnen', { timeout: 10000 });
+  await S.screenshot({ path: path.join(OUT, '26-handy-sieg-gegen-computer.png'), fullPage: true });
   if (await U.evaluate(() => window.__audio)) throw new Error('Übungsseite hat Ton gestartet');
   log('Handys und Übungsseite stumm ✓');
   if (errors.length) throw new Error('JavaScript-Fehler:\n' + errors.join('\n'));

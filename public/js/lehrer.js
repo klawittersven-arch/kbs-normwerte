@@ -2,7 +2,7 @@
 import { KNet, randomCode, randomId, store } from './net.js';
 import {
   WERTE, GRUPPEN, STUFEN, STUFE_TEXT, FINAL_GROESSEN, LEBEN_WAHL, LEBEN_QUALI, QUALI_WERTE, SUDDEN_DEATH_AB,
-  KAT_TEXT, KAT_ZEICHEN, INHALT_FEHLER, GNADE, zeitFinale, wert, alleIds, standardIds, gruppenIds,
+  KAT_TEXT, KAT_ZEICHEN, INHALT_FEHLER, GNADE, zeitFinale, wert, alleIds, standardIds, gruppenIds, CPU, istCpu,
 } from './regeln.js';
 import { Ton } from './ton.js';
 import { esc, herzenHTML, zeigeWert, zeitbalken, aufloesung, richtigText } from './ui.js';
@@ -316,7 +316,7 @@ function setup() {
   const all = ranked.concat(others);
   if (screen !== 'setup') {
     screen = 'setup';
-    view.innerHTML = `<div class="tpage">
+    view.innerHTML = `<div class="tpage scroll">
       <div class="thead"><div><h2>Finale</h2><p>Die Besten aus dem Qualifying sind ausgewählt. Der Wert erscheint nur am Beamer, geantwortet wird auf dem Handy. Alle anderen raten auf dem Handy mit.</p></div></div>
       <div class="tcard"><div class="slots" id="slots"></div></div>
       <div class="tcard"><div class="optgrid" id="opts"></div></div>
@@ -329,7 +329,7 @@ function setup() {
     $('#btnFinal').onclick = startFinal;
   }
   const slots = $('#slots');
-  const n = Math.min(cfg.finalN, Math.max(2, all.length));
+  const n = cfg.finalN; // freie Plätze können mit dem Computergegner besetzt werden
   slots.innerHTML = '';
   for (let i = 0; i < n; i++) {
     const pid = f.p[i] || '';
@@ -337,7 +337,8 @@ function setup() {
     const d = document.createElement('div'); d.className = 'slot';
     d.innerHTML = `<h3>Finalist/in ${i + 1}</h3>`;
     const sel = document.createElement('select');
-    sel.innerHTML = '<option value="">– niemand –</option>' + all.map(p => `<option value="${esc(p.pid)}" ${p.pid === pid ? 'selected' : ''}>${p.rank ? p.rank + '. ' : ''}${esc(p.name)}${p.q ? ' · ' + richtigText(p.q.r) : ''}</option>`).join('');
+    sel.innerHTML = '<option value="">– niemand –</option>' + all.map(p => `<option value="${esc(p.pid)}" ${p.pid === pid ? 'selected' : ''}>${p.rank ? p.rank + '. ' : ''}${esc(p.name)}${p.q ? ' · ' + richtigText(p.q.r) : ''}</option>`).join('')
+      + `<optgroup label="Computergegner">${Object.entries(CPU).map(([id, c]) => `<option value="${id}" ${id === pid ? 'selected' : ''}>${esc(c.name)} · trifft ca. ${Math.round(c.quote * 100)} %</option>`).join('')}</optgroup>`;
     sel.onchange = () => {
       const next = [];
       slots.querySelectorAll('select').forEach(s => { if (s.value && !next.includes(s.value)) next.push(s.value); });
@@ -345,8 +346,8 @@ function setup() {
     };
     d.appendChild(sel);
     const on = document.createElement('div');
-    on.className = 'online ' + (pl ? (pl.online ? 'ja' : 'nein') : '');
-    on.textContent = pl ? (pl.online ? '● Handy verbunden' : '● Handy nicht verbunden: Seite neu öffnen') : '';
+    on.className = 'online ' + (istCpu(pid) ? 'ja' : pl ? (pl.online ? 'ja' : 'nein') : '');
+    on.textContent = istCpu(pid) ? '● Computer ist bereit' : pl ? (pl.online ? '● Handy verbunden' : '● Handy nicht verbunden: Seite neu öffnen') : '';
     d.appendChild(on);
     slots.appendChild(d);
   }
@@ -461,6 +462,8 @@ function planeRunde(f) {
     FB.raf = requestAnimationFrame(tick);
   }, f.startAt);
   for (let s = 3; s >= 1; s--) at(() => { if (FB && FB.offen && FB.round === f.round) Ton.tick(); }, f.deadline - s * 1000);
+  // Computergegner: zum geplanten Zeitpunkt dem Server Bescheid geben (er trägt die Antwort ein)
+  for (const zeitpunkt of new Set(f.cpu || [])) at(() => { if (FB && FB.round === f.round) send({ t: 'cpu', nr: f.nr, r: f.round }); }, zeitpunkt + 50);
   // Zeit abgelaufen: dem Server Bescheid geben (er wertet dann aus)
   at(() => send({ t: 'tick', nr: f.nr, r: f.round }), f.deadline + GNADE + 200);
   at(() => send({ t: 'tick', nr: f.nr, r: f.round }), f.deadline + GNADE + 2500);

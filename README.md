@@ -48,7 +48,7 @@ Genauso wie bei KBS Simon says, KBS-Kart und Tetris:
 4. **Qualifying starten** (Enter). Nach einem Countdown spielen alle **gleichzeitig allein auf dem Handy**. Alle bekommen dieselben Werte in derselben Reihenfolge. Nach **3 Fehlern** ist Schluss, spätestens nach **40 Werten**. Am Beamer läuft eine Live-Rangliste mit Herzen (Leben) und der Zahl der richtigen Antworten. Nachzügler können über den kleinen QR-Code noch einsteigen.
 5. Nach jedem Fehler zeigt das Handy die **Auflösung**, z. B. „SpO₂ 89 % ist ▼ zu niedrig. Normal: 95–100 % · Hypoxämie“. Am Ende sieht jede/r die eigenen Fehler noch einmal zum Nachlesen.
 6. **Qualifying beenden** (Enter), sobald alle fertig sind (der Knopf blinkt dann). Wer noch spielt, behält den bisherigen Stand.
-7. **Finale einrichten:** Die Besten sind vorausgewählt, über die Auswahllisten lässt sich jemand austauschen. Alle Einstellungen lassen sich fürs Finale noch ändern. **Finale starten** (Enter), sobald alle Finalisten-Handys verbunden sind.
+7. **Finale einrichten:** Die Besten sind vorausgewählt, über die Auswahllisten lässt sich jemand austauschen. In jeder Liste kannst du auch einen **Computergegner** wählen: 🤖 Computer (leicht, mittel oder schwer). Er trifft etwa 60, 75 bzw. 90 % der Werte und antwortet nach einer zufälligen Bedenkzeit von 1 bis 6 Sekunden. Hat nur eine Person am Qualifying teilgenommen, ist „Computer (mittel)“ automatisch als zweite/r Finalist/in eingetragen. Alle Einstellungen lassen sich fürs Finale noch ändern. **Finale starten** (Enter), sobald alle Finalisten-Handys verbunden sind.
 8. **Finale:** Der Wert erscheint **nur am Beamer**, groß und als Gerätedisplay (mit Ton, z. B. dem Herzschlag am Monitor oder dem Metronom bei der Reanimation). Die Finalisten antworten auf dem Handy, alle anderen **raten auf dem Handy mit** (das zählt nicht fürs Finale). Nach jedem Wert zeigt der Beamer die Auflösung, wer richtig lag und wie viele aus dem Publikum richtig geraten haben. Ein Fehler oder keine Antwort kostet ein Leben. Wer keine Leben mehr hat, ist raus und rät ab dann im Publikum mit. Wer zuletzt übrig ist, gewinnt.
 9. **Siegerehrung** mit Pokal, Platzierungen, den Besten im Publikum und allen Werten des Finales zum Nachlesen. Danach **Revanche** (Enter, gleiche Finalisten, neue Werte), **Andere Finalisten** oder **Neues Spiel** (Esc, zurück zur Anmeldung, alle bleiben angemeldet).
 
@@ -200,6 +200,7 @@ Der Browser-Durchlauf prüft:
 - Anmeldung und Qualifying mit richtigen und falschen Antworten (getippt und gewischt), abgelaufener Zeit und einem neu geladenen Handy.
 - Die Rangliste.
 - Ein Finale mit 4 Personen und 2 Leben (Leben verlieren, Ausscheiden, keine Antwort, Platzierungen) mit Mitraten aus dem Publikum.
+- Allein im Qualifying und dann ein Finale gegen den Computergegner.
 - Ein zweites Finale mit 2 Personen, 1 Leben, nur Laborwerten und der Stufe „Knapp“.
 - Die Übungsseite und die Normwerte-Liste.
 - Dass Handys und Übungsseite keinen Ton abspielen.

@@ -1,8 +1,8 @@
 // Tests der Raum-Logik ohne Server:  node --test tests/
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { RoomLogic, werteRunde, cleanName, cleanCfg } from '../src/room.js';
-import { zeitFinale, GNADE, SUDDEN_DEATH_AB, KATEGORIEN, alleIds, standardIds, wert } from '../public/js/regeln.js';
+import { RoomLogic, werteRunde, cleanName, cleanCfg, cpuEntscheidung } from '../src/room.js';
+import { zeitFinale, GNADE, SUDDEN_DEATH_AB, KATEGORIEN, alleIds, standardIds, wert, rng, aufgaben, kann, CPU } from '../public/js/regeln.js';
 
 function makeRoom() {
   let t = 1_000_000, saved = null;
@@ -204,4 +204,70 @@ test('Handy neu geladen: Stand im Qualifying bleibt erhalten', async () => {
   const y = R.last(neu, 'you');
   assert.deepEqual([y.me.q.n, y.me.q.r, y.me.q.f], [4, 3, 1]);
   assert.equal(y.me.name, 'Ali K.');
+});
+
+test('Computergegner: Trefferquote, passende falsche Antworten, menschliche Bedenkzeit', () => {
+  const r = rng(2024);
+  const items = aufgaben(5, alleIds(), 'deutlich', 60);
+  for (const [id, c] of Object.entries(CPU)) {
+    let richtig = 0, n = 0;
+    for (let i = 0; i < 3000; i++) {
+      const item = items[i % items.length], limit = zeitFinale(1 + (i % 40));
+      const e = cpuEntscheidung(c.quote, item, limit, r);
+      n++; if (e.a === item.kat) richtig++;
+      assert.ok(KATEGORIEN.includes(e.a));
+      if (e.a !== item.kat) assert.ok(kann(wert(item.id), e.a, item.sex), 'falsche Antwort, die es gar nicht gibt: ' + e.a + ' bei ' + item.id);
+      assert.ok(e.ms >= 1200 && e.ms <= Math.max(1600, limit - 1200), 'Bedenkzeit ' + e.ms);
+    }
+    assert.ok(Math.abs(richtig / n - c.quote) < 0.04, id + ': trifft ' + Math.round(richtig / n * 100) + ' % statt ' + c.quote * 100 + ' %');
+  }
+});
+
+test('Allein im Qualifying: Finale gegen den Computer', async () => {
+  const R = makeRoom();
+  const { T, P } = await klasse(R, ['Ali']);
+  await R.msg(T, { t: 'quali-start' });
+  await R.msg(T, { t: 'quali-end' });
+  let room = R.last(T, 'room');
+  assert.deepEqual(room.final.p, [P[0].pid, 'cpu-mittel'], 'Computer (mittel) ist vorausgewählt');
+  await R.msg(T, { t: 'final-pick', p: [P[0].pid, 'cpu-schwer'] });
+  await R.msg(T, { t: 'final-start', p: [P[0].pid, 'cpu-schwer'], cfg: { leben: 1 } });
+  room = R.last(T, 'room');
+  assert.equal(room.phase, 'final', 'Computer braucht kein Handy');
+  let f = room.final;
+  assert.equal(f.names[1], CPU['cpu-schwer'].name);
+  assert.equal(f.cpu.length, 1);
+  assert.ok(f.cpu[0] > f.startAt && f.cpu[0] < f.deadline);
+  // Das Handy erfährt nichts über den Computer
+  const y = R.last(P[0], 'you').final;
+  assert.equal(y.cpu, undefined);
+  for (let runde = 1; runde <= 20 && room.phase === 'final'; runde++) {
+    f = room.final;
+    R.tick(f.startAt - R.now() + 300);
+    await R.msg(P[0], { t: 'fa', nr: f.nr, r: f.round, a: f.item.kat, ms: 300 });
+    await R.msg(T, { t: 'cpu', nr: f.nr, r: f.round }); // zu früh: nichts passiert
+    assert.equal(R.last(T, 'room').final.round, f.round);
+    R.tick(f.cpu[0] - R.now() + 60);
+    await R.msg(T, { t: 'cpu', nr: f.nr, r: f.round });
+    room = R.last(T, 'room');
+    assert.ok(room.phase === 'podium' || room.final.round === f.round + 1, 'Runde ausgewertet');
+  }
+  assert.equal(room.phase, 'podium', 'Der Computer macht irgendwann einen Fehler');
+  assert.equal(room.final.st[0].place, 1);
+  assert.equal(room.final.st[1].place, 2);
+});
+
+test('Computergegner antwortet auch, wenn die Meldung vom Beamer fehlt (Zeit um)', async () => {
+  const R = makeRoom();
+  const { T, P } = await klasse(R, ['Ali', 'Ben']);
+  await R.msg(T, { t: 'quali-start' });
+  await R.msg(T, { t: 'quali-end' });
+  await R.msg(T, { t: 'final-start', p: [P[0].pid, 'cpu-leicht'], cfg: { leben: 2 } });
+  const f = R.last(T, 'room').final;
+  R.tick(f.deadline - R.now() + GNADE + 100);
+  await R.msg(T, { t: 'tick', nr: f.nr, r: 1 });
+  const g = R.last(T, 'room').final;
+  assert.equal(g.round, 2);
+  assert.notEqual(g.last.ant[1].a, 'zeit', 'Computer hat geantwortet');
+  assert.equal(g.last.ant[0].a, 'zeit');
 });

@@ -193,6 +193,8 @@ body.beamer .chip{font-size:.72em}
 .codechip{font-weight:700;font-size:.85em;letter-spacing:.12em;padding:.35em .7em;border-radius:.5em;background:var(--panel);border:2px solid var(--line)}
 .tview{flex:1;display:flex;flex-direction:column;min-height:0}
 .tpage{flex:1;display:flex;flex-direction:column;gap:1em;min-height:0}
+.tpage.scroll{overflow:auto}
+.tpage.scroll .ranks{flex:none;min-height:auto;overflow:visible}
 .tcard{background:var(--card);border:2px solid var(--line);border-radius:1em;padding:1.1em;display:flex;flex-direction:column;gap:.8em;min-width:0}
 .tcard h2,.thead h2{margin:0;font-family:var(--f-display);font-weight:400;color:var(--sun);line-height:1.05;text-wrap:balance}
 .thead{display:flex;align-items:flex-end;justify-content:space-between;gap:1em;flex-wrap:wrap}

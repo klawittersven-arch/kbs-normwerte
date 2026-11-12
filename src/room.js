@@ -4,6 +4,7 @@
 import {
   KATEGORIEN, STUFEN, FINAL_GROESSEN, LEBEN_WAHL, LEBEN_QUALI, QUALI_WERTE, FINALE_MAX, SUDDEN_DEATH_AB,
   VORLAUF_START, VORLAUF_RUNDE, GNADE, zeitFinale, aufgaben, alleIds, standardIds, vergleichQuali, zufallsSeed,
+  CPU, istCpu, wert, kann,
 } from '../public/js/regeln.js';
 
 export const MAX_PLAYERS = 60;
@@ -50,6 +51,20 @@ export function freshState(code) {
     final: null,
     nr: 0, // zählt Qualifying- und Finalrunden, damit alte Nachrichten nicht zählen
   };
+}
+
+// Was antwortet der Computergegner, und nach wie vielen ms? (zufall: Zahl von 0 bis 1)
+// Mit der Trefferquote richtig, sonst eine andere Antwort, die es bei diesem Wert gibt.
+export function cpuEntscheidung(quote, item, limit, zufall = Math.random) {
+  const p = wert(item.id);
+  let a = item.kat;
+  if (zufall() >= quote) {
+    const andere = KATEGORIEN.filter(k => k !== item.kat && (!p || kann(p, k, item.sex)));
+    const auswahl = andere.length ? andere : KATEGORIEN.filter(k => k !== item.kat);
+    a = auswahl[Math.floor(zufall() * auswahl.length)];
+  }
+  const max = Math.max(1600, Math.min(limit - 1200, 6500));   // Bedenkzeit wie ein Mensch: 1,2 s bis höchstens 6,5 s
+  return { a, ms: Math.round(1200 + zufall() * (max - 1200)) };
 }
 
 // Zeitplan eines Werts im Finale: sichtbar ab startAt, Antworten bis deadline
@@ -184,7 +199,9 @@ export class RoomLogic {
           else if (!p.q.done) { p.q.done = true; p.q.why = 'ende'; }
         }
         s.phase = 'final-setup';
-        s.final = { p: this.ranking().slice(0, s.cfg.finalN), state: 'setup' };
+        const p = this.ranking().slice(0, s.cfg.finalN);
+        if (p.length < 2) p.push('cpu-mittel'); // allein im Qualifying: gegen den Computer
+        s.final = { p, state: 'setup' };
         await this.persist(); this.pushAll(); return;
       }
       case 'final-pick': {
@@ -198,15 +215,15 @@ export class RoomLogic {
         if (msg.t === 'final-start' && s.phase !== 'final-setup') return;
         if (msg.t === 'revanche' && s.phase !== 'podium') return;
         const p = msg.t === 'revanche' && s.final ? s.final.p.slice() : this.cleanFinalists(msg.p, s);
-        if (!p || p.length < 2 || !p.every(pid => s.players[pid])) return conn.send({ t: 'error', why: 'final-players' });
+        if (!p || p.length < 2 || !p.every(pid => s.players[pid] || istCpu(pid))) return conn.send({ t: 'error', why: 'final-players' });
         const on = this.online();
-        if (!p.every(pid => on.has(pid))) return conn.send({ t: 'error', why: 'final-offline' });
+        if (!p.every(pid => istCpu(pid) || on.has(pid))) return conn.send({ t: 'error', why: 'final-offline' });
         if (msg.cfg) s.cfg = cleanCfg(msg.cfg, s.cfg);
         const seed = zufallsSeed();
         const leben = s.cfg.leben;
         s.nr++;
         s.final = {
-          nr: s.nr, p, names: p.map(pid => s.players[pid].name), seed,
+          nr: s.nr, p, names: p.map(pid => istCpu(pid) ? CPU[pid].name : s.players[pid].name), seed,
           ids: s.cfg.ids, stufe: s.cfg.stufe, leben,
           items: aufgaben(seed, s.cfg.ids, s.cfg.stufe, FINALE_MAX),
           round: 1, state: 'run', last: null, first: true, z: {},
@@ -214,6 +231,7 @@ export class RoomLogic {
           ...rundenPlan(now + VORLAUF_START, 1),
           revanche: msg.t === 'revanche' ? ((s.final && s.final.revanche) || 0) + 1 : 0,
         };
+        this.planeCpu(s.final);
         for (const pid of s.order) s.players[pid].z = null;
         s.phase = 'final';
         await this.persist(); this.pushAll(); return;
@@ -227,8 +245,16 @@ export class RoomLogic {
           return this.maybeResolve(s, true);
         }
         if (now < f.deadline + GNADE) return;
+        this.cpuNachholen(s);
         f.st.forEach(x => { if (x.alive && !x.a) { x.a = 'zeit'; x.ok = false; x.dt = zeitFinale(f.round); } });
         return this.maybeResolve(s, true);
+      }
+      case 'cpu': {
+        // Der Beamer meldet: Der Computergegner ist mit seiner Antwort dran
+        const f = s.final;
+        if (s.phase !== 'final' || !f || f.state !== 'run' || msg.nr !== f.nr || msg.r !== f.round) return;
+        if (this.cpuNachholen(s)) return this.maybeResolve(s);
+        return;
       }
       case 'final-abort': {
         if (s.phase !== 'final' && s.phase !== 'podium') return;
@@ -255,7 +281,7 @@ export class RoomLogic {
   }
 
   cleanFinalists(list, s) {
-    const p = Array.isArray(list) ? list.map(String).filter(pid => s.players[pid]) : [];
+    const p = Array.isArray(list) ? list.map(String).filter(pid => s.players[pid] || istCpu(pid)) : [];
     if (new Set(p).size !== p.length || p.length > Math.max(...FINAL_GROESSEN)) return null;
     return p;
   }
@@ -334,6 +360,31 @@ export class RoomLogic {
     }
   }
 
+  // Computergegner: Antwort und Zeitpunkt für den aktuellen Wert festlegen (der Beamer meldet sich dann mit „cpu“)
+  planeCpu(f) {
+    f.cpu = {};
+    const item = f.items[f.round - 1];
+    f.p.forEach((pid, i) => {
+      if (!istCpu(pid) || !f.st[i].alive) return;
+      const e = cpuEntscheidung(CPU[pid].quote, item, zeitFinale(f.round));
+      f.cpu[i] = { at: f.startAt + e.ms, a: e.a };
+    });
+  }
+  // Fällige Antworten des Computergegners eintragen. Rückgabe: true, wenn etwas eingetragen wurde
+  cpuNachholen(s) {
+    const f = s.final, now = this.io.now();
+    let neu = false;
+    for (const [slot, c] of Object.entries(f.cpu || {})) {
+      const x = f.st[slot];
+      if (!x || !x.alive || x.a || now < c.at - 500) continue;
+      x.a = c.a; x.ok = c.a === f.items[f.round - 1].kat; x.dt = Math.max(0, c.at - f.startAt);
+      neu = true;
+      const out = JSON.stringify({ t: 'fp', nr: f.nr, r: f.round, slot: Number(slot) });
+      for (const k of this.io.conns()) if ((k.meta || {}).role === 'teacher') k.sendRaw(out);
+    }
+    return neu;
+  }
+
   // Hat jede/r im Publikum (mit verbundenem Handy) schon mitgeraten?
   publikumFertig(s) {
     const f = s.final;
@@ -378,6 +429,7 @@ export class RoomLogic {
       Object.assign(f, rundenPlan(this.io.now() + VORLAUF_RUNDE, f.round));
       f.first = false;
       for (const x of f.st) if (x.alive) { x.a = null; x.ok = null; x.dt = 0; }
+      this.planeCpu(f);
     }
     await this.persist(); this.pushAll();
   }
@@ -407,6 +459,7 @@ export class RoomLogic {
     if (f.state === 'done') v.verlauf = f.items.slice(0, f.round);
     if (beamer) {
       v.item = f.state === 'run' ? f.items[f.round - 1] : null;
+      v.cpu = f.state === 'run' ? Object.values(f.cpu || {}).map(c => c.at) : [];
       v.st = f.st;
       v.zCount = Object.keys(f.z || {}).length;
     }
@@ -419,7 +472,7 @@ export class RoomLogic {
       return { pid, name: p.name, q: p.q, z: p.z, online: on.has(pid), rank: rank.indexOf(pid) + 1 };
     });
     const f = this.finalView(s.final, true);
-    if (f) f.online = f.p.map(pid => on.has(pid));
+    if (f) f.online = f.p.map(pid => istCpu(pid) || on.has(pid));
     return { t: 'room', code: s.code, phase: s.phase, cfg: s.cfg, quali: s.quali, players, now: this.io.now(), final: f };
   }
   youMsg(pid) {

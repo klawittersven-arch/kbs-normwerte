@@ -29,6 +29,14 @@ export const zeitQuali = i => Math.max(5000, 10000 - Math.floor(i / 5) * 1000);
 // Finale: 10 s, alle 3 Werte 1 s weniger, nie unter 4 s (runde = 1, 2, 3 …)
 export const zeitFinale = runde => Math.max(4000, 10000 - Math.floor((runde - 1) / 3) * 1000);
 
+// Computergegner im Finale: Trefferquote je Stufe
+export const CPU = {
+  'cpu-leicht': { name: '🤖 Computer (leicht)', quote: 0.6 },
+  'cpu-mittel': { name: '🤖 Computer (mittel)', quote: 0.75 },
+  'cpu-schwer': { name: '🤖 Computer (schwer)', quote: 0.9 },
+};
+export const istCpu = pid => Object.prototype.hasOwnProperty.call(CPU, pid);
+
 export const VORLAUF_START = 5000;  // Countdown vor dem ersten Wert im Finale
 export const VORLAUF_RUNDE = 6000;  // Pause zwischen zwei Werten im Finale (Auflösung am Beamer)
 export const GNADE = 1500;          // So lange nach Ablauf der Zeit werden Antworten noch angenommen (Netz)

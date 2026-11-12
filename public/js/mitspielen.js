@@ -39,19 +39,24 @@ function connect() {
       netdot.dataset.s = s;
       if (s === 'offline' && net.stopped) {
         if (net.stopped === 'no-room') show('noroom', `<div class="card"><h2>Raum nicht gefunden</h2><p>Zum Code <b>${esc(code)}</b> gibt es gerade kein Spiel. Ist die Lehrer-Seite am Beamer geöffnet? Scanne den QR-Code noch einmal.</p><button class="big-btn" id="btnRetry">Nochmal versuchen</button></div>`, () => { $('#btnRetry').onclick = () => location.reload(); });
-        else if (net.stopped === 'ended') { stopQuali(); stopFinal(); show('ended', '<div class="card"><h2>Das Spiel ist beendet</h2><p>Die Lehrkraft hat die Sitzung geschlossen. Danke fürs Mitspielen!</p><p><a class="mehr" href="./">Allein weiterüben</a></p></div>'); }
+        else if (net.stopped === 'ended') spielEnde();
       }
     },
   });
   net.open();
 }
 function send(obj) { if (net) net.send(obj, true); }
+function spielEnde() {
+  you = null; stopQuali(); stopFinal(); wachHalten(false);
+  show('ended', '<div class="card"><h2>Das Spiel ist beendet</h2><p>Die Lehrkraft hat die Sitzung geschlossen. Danke fürs Mitspielen!</p><p><a class="mehr" href="./">Allein weiterüben</a></p></div>');
+}
 
 function onMessage(m) {
   // Uhrabgleich, falls die genaue Messung noch fehlt
   if (typeof m.now === 'number' && net.rtt > 5000) net.offset = m.now - Date.now();
   switch (m.t) {
     case 'you': you = m; update(); break;
+    case 'ended': spielEnde(); break;
     case 'kicked': you = null; stopQuali(); stopFinal(); store('normwerte.name', null); show('kicked', '<div class="card"><h2>Abgemeldet</h2><p>Die Lehrkraft hat deinen Namen entfernt. Du kannst dich mit einem anderen Namen neu anmelden.</p><button class="big-btn" id="btnAgain">Neu anmelden</button></div>', () => { $('#btnAgain').onclick = () => location.reload(); }); break;
     case 'error':
       if (m.why === 'bad-name') { const e = $('#joinErr'); if (e) { e.textContent = 'Bitte einen Vornamen (nur Buchstaben) und den ersten Buchstaben des Nachnamens eingeben.'; e.hidden = false; } }

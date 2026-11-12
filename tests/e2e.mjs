@@ -257,6 +257,21 @@ try {
   await U.screenshot({ path: path.join(OUT, '22-ueben-normwerte.png'), fullPage: true });
 
   for (const ph of Object.values(phones)) if (await ph.p.evaluate(() => window.__audio)) throw new Error(ph.name + ': Handy hat Ton gestartet');
+
+  // ---------------- Falscher Code: „Raum nicht gefunden“
+  const fctx = await browser.newContext({ viewport: { width: 390, height: 780 }, isMobile: true, hasTouch: true });
+  const F = await fctx.newPage();
+  F.on('pageerror', e => errors.push('Falscher Code: ' + e.message));
+  await F.goto(`${BASE}/mitspielen?c=ZZZZ9`);
+  await F.waitForSelector('text=Raum nicht gefunden', { timeout: 15000 });
+  log('Falscher Code: „Raum nicht gefunden“ ✓');
+
+  // ---------------- Sitzung beenden: Handys zeigen „Das Spiel ist beendet“
+  await T.click('#btnSess'); await T.click('#btnWipe');
+  await Promise.all(Object.values(phones).map(ph => ph.p.waitForSelector('text=Das Spiel ist beendet', { timeout: 15000 })));
+  await phones.Sara.p.screenshot({ path: path.join(OUT, '23-handy-sitzung-beendet.png') });
+  await T.waitForFunction(c => !document.querySelector('#codeChip').textContent.includes(c), code, { timeout: 15000 });
+  log('Sitzung gelöscht, Beamer hat einen neuen Code ✓');
   if (await U.evaluate(() => window.__audio)) throw new Error('Übungsseite hat Ton gestartet');
   log('Handys und Übungsseite stumm ✓');
   if (errors.length) throw new Error('JavaScript-Fehler:\n' + errors.join('\n'));

@@ -69,9 +69,11 @@ export function KNet(opts) {
     };
     sock.onclose = ev => {
       if (ws !== sock) return;
-      ws = null; clearInterval(pingT); setStatus('offline');
-      if (ev.code === 4001 || ev.code === 4000) { wanted = false; net.stopped = ev.reason || 'closed'; return; }
-      if (wanted) schedule();
+      ws = null; clearInterval(pingT);
+      // Erst den Grund merken, dann den Status melden (sonst sieht onStatus den Grund nicht)
+      if (ev.code === 4001 || ev.code === 4000) { wanted = false; net.stopped = ev.reason || 'closed'; }
+      setStatus('offline');
+      if (wanted && !net.stopped) schedule();
     };
     sock.onerror = () => {};
   }

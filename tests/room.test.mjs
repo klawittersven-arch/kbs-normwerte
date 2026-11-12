@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { RoomLogic, werteRunde, cleanName, cleanCfg, cpuEntscheidung } from '../src/room.js';
-import { zeitFinale, GNADE, SUDDEN_DEATH_AB, KATEGORIEN, alleIds, standardIds, wert, rng, aufgaben, kann, CPU } from '../public/js/regeln.js';
+import { zeitFinale, GNADE, SUDDEN_DEATH_AB, KATEGORIEN, alleIds, standardIds, wert, rng, aufgaben, kann, CPU, FINALE_MAX } from '../public/js/regeln.js';
 
 function makeRoom() {
   let t = 1_000_000, saved = null;
@@ -241,7 +241,8 @@ test('Allein im Qualifying: Finale gegen den Computer', async () => {
   // Das Handy erfährt nichts über den Computer
   const y = R.last(P[0], 'you').final;
   assert.equal(y.cpu, undefined);
-  for (let runde = 1; runde <= 20 && room.phase === 'final'; runde++) {
+  // Spätestens nach FINALE_MAX Werten ist Schluss; dann gewinnt der schnellere Mensch. So ist der Test nie Glückssache.
+  for (let runde = 1; runde <= FINALE_MAX && room.phase === 'final'; runde++) {
     f = room.final;
     R.tick(f.startAt - R.now() + 300);
     await R.msg(P[0], { t: 'fa', nr: f.nr, r: f.round, a: f.item.kat, ms: 300 });
@@ -252,7 +253,7 @@ test('Allein im Qualifying: Finale gegen den Computer', async () => {
     room = R.last(T, 'room');
     assert.ok(room.phase === 'podium' || room.final.round === f.round + 1, 'Runde ausgewertet');
   }
-  assert.equal(room.phase, 'podium', 'Der Computer macht irgendwann einen Fehler');
+  assert.equal(room.phase, 'podium', 'Finale beendet');
   assert.equal(room.final.st[0].place, 1);
   assert.equal(room.final.st[1].place, 2);
 });

@@ -1,6 +1,6 @@
 # KBS Normwert-Blitz
 
-Ein Spiel für die ganze Klasse zu Normwerten (Vitalzeichen und Laborwerte, CE 02/05). Die SuS sehen Messwerte so, wie sie auf Station aussehen: am EKG-Monitor, am Pulsoximeter, am Blutdruckmessgerät, am Ohrthermometer, am Blutzuckermessgerät, an der Personenwaage (BMI) oder im Laborbefund. Sie entscheiden jedes Mal: **zu niedrig**, **normal** oder **zu hoch**? Das geht per Wischen oder Tippen. Erst spielen alle allein auf dem Handy (Qualifying). Dann spielen die Besten im Finale am Beamer gegeneinander, und alle anderen raten auf dem Handy mit.
+Ein Spiel für die ganze Klasse zu Normwerten (Vitalzeichen und Laborwerte, CE 02/05). Die SuS sehen Messwerte so, wie sie auf Station aussehen: am EKG-Monitor, am Pulsoximeter, am Blutdruckmessgerät, am Ohrthermometer, am Blutzuckermessgerät, an der Personenwaage (BMI), am Urinsammelbehälter, am Reanimations-Feedbackgerät, an der Stoppuhr (Rekapillarisierungszeit), am Peak-Flow-Meter, an der Perzentilenkurve oder im Laborbefund. Sie entscheiden jedes Mal: **zu niedrig**, **normal** oder **zu hoch**? Das geht per Wischen oder Tippen. Erst spielen alle allein auf dem Handy (Qualifying). Dann spielen die Besten im Finale am Beamer gegeneinander, und alle anderen raten auf dem Handy mit.
 
 | Seite | Adresse | Für wen |
 |---|---|---|
@@ -40,7 +40,8 @@ Genauso wie bei KBS Simon says, KBS-Kart und Tetris:
 1. **Lehrer-Link am Laptop öffnen**, Beamer und Lautsprecher an, **F** für Vollbild. Oben rechts steht der Code der Sitzung.
 2. **Anmeldung:** Die SuS scannen den QR-Code und geben ihren Vornamen und den ersten Buchstaben des Nachnamens ein (z. B. „Lena K.“). Die Namen erscheinen am Beamer. Mit **×** entfernst du unpassende Namen.
 3. **Einstellungen** (unter den Namen, bleiben gespeichert):
-   - **Werte:** Vitalzeichen, Laborwerte oder beides. Voreingestellt sind nur die Vitalzeichen, alle Laborwerte sind abgewählt. **BMI** ist eine Zusatzoption (gestrichelter Knopf): Er kommt nur vor, wenn du ihn anklickst, auch nicht über „Beides“. Mit den kleinen Knöpfen darunter wählst du einzelne Werte an oder ab, z. B. nur HF, RR und SpO₂ für eine Einführungsstunde.
+   - **Werte:** in drei Gruppen: **Vitalzeichen**, **Laborwerte** und **Notfall & Kinder**. Voreingestellt sind nur die sechs Vitalzeichen (HF, RR, SpO₂, AF, Temp., BZ). Mit den kleinen Knöpfen wählst du einzelne Werte an oder ab, z. B. nur HF, RR und SpO₂ für eine Einführungsstunde. Mit **alle** und **keine** neben jeder Gruppe wählst du die ganze Gruppe auf einmal.
+   - **Zusatzoptionen** (gestrichelte Knöpfe) kommen nur vor, wenn du sie anklickst bzw. „alle“ wählst, nicht über „Vitalzeichen“, „Laborwerte“ oder „Beides“. Das sind BMI, SpO₂ bei COPD, Urinmenge, die Laborwerte aus dem 2./3. AJ und die ganze Gruppe „Notfall & Kinder“.
    - **Stufe:** **Deutlich** (Werte liegen klar im Normbereich oder klar daneben) oder **Knapp** (Werte nah an der Grenze, z. B. AF 21/min oder Kalium 5,1 mmol/l).
    - **Finale:** mit 2, 3, 4, 6 oder 8 Personen.
    - **Leben:** 1, 2 oder 3 Leben im Finale.
@@ -48,7 +49,7 @@ Genauso wie bei KBS Simon says, KBS-Kart und Tetris:
 5. Nach jedem Fehler zeigt das Handy die **Auflösung**, z. B. „SpO₂ 89 % ist ▼ zu niedrig. Normal: 95–100 % · Hypoxämie“. Am Ende sieht jede/r die eigenen Fehler noch einmal zum Nachlesen.
 6. **Qualifying beenden** (Enter), sobald alle fertig sind (der Knopf blinkt dann). Wer noch spielt, behält den bisherigen Stand.
 7. **Finale einrichten:** Die Besten sind vorausgewählt, über die Auswahllisten lässt sich jemand austauschen. Alle Einstellungen lassen sich fürs Finale noch ändern. **Finale starten** (Enter), sobald alle Finalisten-Handys verbunden sind.
-8. **Finale:** Der Wert erscheint **nur am Beamer**, groß und als Gerätedisplay (mit Ton, z. B. dem Herzschlag am Monitor). Die Finalisten antworten auf dem Handy, alle anderen **raten auf dem Handy mit** (das zählt nicht fürs Finale). Nach jedem Wert zeigt der Beamer die Auflösung, wer richtig lag und wie viele aus dem Publikum richtig geraten haben. Ein Fehler oder keine Antwort kostet ein Leben. Wer keine Leben mehr hat, ist raus und rät ab dann im Publikum mit. Wer zuletzt übrig ist, gewinnt.
+8. **Finale:** Der Wert erscheint **nur am Beamer**, groß und als Gerätedisplay (mit Ton, z. B. dem Herzschlag am Monitor oder dem Metronom bei der Reanimation). Die Finalisten antworten auf dem Handy, alle anderen **raten auf dem Handy mit** (das zählt nicht fürs Finale). Nach jedem Wert zeigt der Beamer die Auflösung, wer richtig lag und wie viele aus dem Publikum richtig geraten haben. Ein Fehler oder keine Antwort kostet ein Leben. Wer keine Leben mehr hat, ist raus und rät ab dann im Publikum mit. Wer zuletzt übrig ist, gewinnt.
 9. **Siegerehrung** mit Pokal, Platzierungen, den Besten im Publikum und allen Werten des Finales zum Nachlesen. Danach **Revanche** (Enter, gleiche Finalisten, neue Werte), **Andere Finalisten** oder **Neues Spiel** (Esc, zurück zur Anmeldung, alle bleiben angemeldet).
 
 ### Regeln im Detail
@@ -58,7 +59,7 @@ Genauso wie bei KBS Simon says, KBS-Kart und Tetris:
 - **Rangliste im Qualifying:** mehr richtige Antworten vorn, bei Gleichstand weniger Fehler, dann die schnelleren Antworten.
 - **Sudden Death:** Ab dem 30. Wert im Finale kostet jeder Fehler alle Leben, damit das Finale sicher endet.
 - Scheiden die letzten Finalisten beim selben Wert aus, steht vorn, wer im Finale mehr richtig hatte, bei Gleichstand, wer schneller geantwortet hat.
-- Jeder Wert kommt etwa gleich oft dran, nie zweimal direkt hintereinander. „Zu niedrig“, „normal“ und „zu hoch“ kommen etwa gleich oft vor. Bei SpO₂ und Quick gibt es kein „zu hoch“, bei CRP und Kreatinin kein „zu niedrig“.
+- Jeder Wert kommt etwa gleich oft dran, nie zweimal direkt hintereinander. „Zu niedrig“, „normal“ und „zu hoch“ kommen etwa gleich oft vor. Manche Werte weichen nur in eine Richtung ab, z. B. gibt es bei SpO₂, Quick und Peak-Flow kein „zu hoch“, bei CRP, Kreatinin, Leberwerten, HbA1c und Rekapillarisierungszeit kein „zu niedrig“. Bei „SpO₂ bei COPD“ gibt es dagegen ein „zu hoch“ (Zielbereich 88–92 %).
 - Beim Blutdruck sind immer beide Werte gleich eingeordnet (z. B. 85/50 oder 165/100, nie 150/60). Der Puls auf dem Blutdruckgerät und dem Pulsoximeter ist immer normal und wird nicht abgefragt.
 - Die Geräte zeigen keine Alarmgrenzen oder Normbereiche an, sonst wäre die Antwort verraten.
 
@@ -121,8 +122,21 @@ Ein Eintrag sieht so aus:
 | Atemfrequenz | 12–20/min | | Leukozyten | 4.000–10.000/µl |
 | Körpertemperatur | 36,3–37,4 °C | | Thrombozyten | 150.000–400.000/µl |
 | Blutzucker nüchtern | 70–100 mg/dl | | CRP | unter 5 mg/l |
-| BMI (Zusatzoption) | 18,5–24,9 kg/m² | | Kreatinin | 0,5–1,2 mg/dl |
-| | | | Quick | 70–130 % |
+| BMI * | 18,5–24,9 kg/m² | | Kreatinin | 0,5–1,2 mg/dl |
+| SpO₂ bei COPD * | 88–92 % | | Quick | 70–130 % |
+| Urinmenge in 24 h * | 1.000–2.000 ml | | HbA1c * | unter 5,7 % |
+| | | | TSH * | 0,4–4,0 mU/l |
+| **Notfall & Kinder** * | | | Erythrozyten * | Frauen 4,0–5,2, Männer 4,5–5,9 Mio/µl |
+| Drückfrequenz (Reanimation) | 100–120/min | | Hämatokrit * | Frauen 37–47, Männer 40–52 % |
+| Drucktiefe (Reanimation) | 5–6 cm | | Harnstoff * | 10–50 mg/dl |
+| Rekapillarisierungszeit | bis 2 Sekunden | | Bilirubin * | bis 1,2 mg/dl |
+| Peak-Flow | 80–100 % vom persönlichen Bestwert | | GOT / GPT * | Frauen bis 35, Männer bis 50 U/l |
+| BMI-Perzentile (Kind) | 10. bis 90. Perzentile | | γ-GT * | Frauen bis 40, Männer bis 60 U/l |
+| | | | Lipase * | 13–60 U/l |
+| | | | Harnsäure * | Frauen 2,4–5,7, Männer 3,4–7,0 mg/dl |
+| | | | INR * | 0,9–1,2 |
+
+\* Zusatzoption: am Beamer zunächst abgewählt.
 
 Die Übungsseite zeigt unter **Normwerte ansehen** immer die aktuelle Liste aus der Datei.
 
@@ -159,7 +173,7 @@ Voraussetzung: Handys und Laptop sind im selben WLAN, und das WLAN erlaubt Verbi
 |---|---|
 | `public/js/normwerte.js` | ← die Normwerte (Normbereiche, Fachbegriffe, Gerät) |
 | `public/js/regeln.js` | Regeln, Zeiten, Prüfen der Normwerte-Datei, Erzeugen der Werte (gilt für Handys, Beamer und Server) |
-| `public/js/geraete.js` | Gerätedisplays als SVG (Monitor, Pulsoximeter, Blutdruckgerät, Thermometer, BZ-Gerät, Personenwaage, Laborbefund) |
+| `public/js/geraete.js` | Gerätedisplays als SVG (Monitor, Pulsoximeter, Blutdruckgerät, Thermometer, BZ-Gerät, Personenwaage, Urinsammelbehälter, Reanimations-Feedback, Stoppuhr, Peak-Flow-Meter, Perzentilenkurve, Laborbefund) |
 | `public/js/antwort.js` | Antwortknöpfe und Wischen |
 | `public/js/spiel.js` | Spiel allein auf dem Handy (Qualifying und Üben) |
 | `public/js/ui.js` | Gemeinsame Anzeige-Bausteine (Auflösung, Herzen, Zeitbalken) |

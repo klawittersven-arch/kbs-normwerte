@@ -8,7 +8,7 @@ import { esc, spielfeldZeigen, countdown, soloAnzeige, aufloesungsListe, wachHal
 
 const $ = s => document.querySelector(s);
 const panel = $('#panel');
-const WAHL = { vital: GRUPPEN.vital, labor: GRUPPEN.labor, alle: 'Beides' };
+const WAHL = { vital: GRUPPEN.vital, labor: GRUPPEN.labor, notfall: GRUPPEN.notfall, alle: 'Alle Werte' };
 const opt = Object.assign({ werte: 'alle', stufe: 'deutlich' }, store('normwerte.ueben') || {});
 if (!WAHL[opt.werte]) opt.werte = 'alle';
 if (!STUFEN.includes(opt.stufe)) opt.stufe = 'deutlich';

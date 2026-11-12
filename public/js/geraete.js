@@ -3,7 +3,7 @@
  * Alle Geräte liegen in einem Feld von 400 × 300 und passen sich jeder Bildschirmgröße an.
  * Es werden keine Alarmgrenzen oder Normbereiche angezeigt – sonst wäre die Antwort verraten.
  */
-import { wert, zahl, wertText } from './regeln.js';
+import { wert, zahl, wertText, stellen, WERTE } from './regeln.js';
 
 let uid = 0;
 const SKEW = Math.tan(6 * Math.PI / 180);
@@ -229,6 +229,173 @@ function laborbefund(item, p) {
     ${t(356, 278, 'technisch validiert', `font-size="10" fill="${grau}" text-anchor="end"`)}`;
 }
 
+// ------------------------------------------------------------------ Notfall, Ausscheidung, Kinder
+// 24-h-Urinsammelbehälter mit Skala und Etikett
+function urinBehaelter(item, p) {
+  const id = 'g' + (++uid);
+  const y = ml => 272 - Math.max(0, Math.min(4000, ml)) / 4000 * 214;
+  let skala = '';
+  for (let ml = 500; ml <= 4000; ml += 500) {
+    skala += `<line x1="112" y1="${y(ml)}" x2="${ml % 1000 ? 124 : 132}" y2="${y(ml)}" stroke="#55606c" stroke-width="${ml % 1000 ? 1.5 : 2.5}"/>`;
+    if (!(ml % 1000)) skala += t(138, y(ml) + 4, String(ml), 'font-size="10" fill="#55606c" font-weight="700"');
+  }
+  return `
+    <defs>
+      <linearGradient id="${id}u" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d64f"/><stop offset="1" stop-color="#e2a92a"/></linearGradient>
+      <clipPath id="${id}k"><rect x="104" y="46" width="160" height="232" rx="18"/></clipPath>
+    </defs>
+    <path d="M150,30 C150,8 218,8 218,30" fill="none" stroke="#9aa3ad" stroke-width="9" stroke-linecap="round"/>
+    <rect x="152" y="26" width="64" height="24" rx="5" fill="#3f6fb5" stroke="#2c4f82" stroke-width="2"/>
+    <rect x="104" y="46" width="160" height="232" rx="18" fill="#eef3f6" stroke="#9fb0bd" stroke-width="3"/>
+    <g clip-path="url(#${id}k)"><rect x="104" y="${y(item.w)}" width="160" height="${290 - y(item.w)}" fill="url(#${id}u)" opacity=".9"/>
+      <rect x="104" y="${y(item.w)}" width="160" height="4" fill="#fff3b0" opacity=".7"/></g>
+    ${skala}
+    ${t(196, 290, 'ml', 'font-size="10" fill="#55606c" text-anchor="middle" font-weight="700"')}
+    <rect x="272" y="70" width="118" height="168" rx="10" fill="#ffffff" stroke="#c9cfd6" stroke-width="2"/>
+    ${t(331, 94, '24-h-Urin', 'font-size="14" fill="#1d2b3a" text-anchor="middle" font-weight="800"')}
+    ${t(331, 112, uhrzeit(item.deko || 0).slice(0, 2) + ':00 – ' + uhrzeit(item.deko || 0).slice(0, 2) + ':00 Uhr', 'font-size="10" fill="#6b7480" text-anchor="middle"')}
+    <line x1="284" y1="124" x2="378" y2="124" stroke="#d6dbe0" stroke-width="1.5"/>
+    ${t(331, 146, 'Gesamtmenge', 'font-size="11" fill="#6b7480" text-anchor="middle" font-weight="700"')}
+    ${t(331, 188, esc(zahl(item.w, p.schritt)), `font-size="${item.w >= 1000 ? 30 : 34}" fill="#1d2b3a" text-anchor="middle" font-weight="800"`)}
+    ${t(331, 214, 'ml', 'font-size="15" fill="#1d2b3a" text-anchor="middle" font-weight="700"')}`;
+}
+
+// Reanimations-Feedback: gefragter Wert groß, der andere klein (und immer richtig)
+export function cprWerte(item) {
+  const p = wert(item.id);
+  const andere = WERTE.find(x => x.anzeige === 'cpr' && x.id !== item.id);
+  if (!p || !andere) return { haupt: p, wert: item.w };
+  const d = item.deko || 0, n = andere.normal;
+  const mitte = (n[0] + n[1]) / 2, spanne = (n[1] - n[0]) / 4;
+  const v = Number((Math.round((mitte + ((d % 7) - 3) / 3 * spanne) / andere.schritt) * andere.schritt).toFixed(stellen(andere.schritt)));
+  return { haupt: p, wert: item.w, neben: andere, nebenWert: v };
+}
+function cpr(item, p) {
+  const id = 'g' + (++uid);
+  const w = cprWerte(item);
+  const neben = w.neben ? `
+    ${t(286, 100, esc(w.neben.kurz.toUpperCase()), `font-size="${w.neben.kurz.length > 11 ? 8.5 : 10}" fill="#8b95a5" text-anchor="middle" font-weight="800"`)}
+    ${t(286, 150, esc(zahl(w.nebenWert, w.neben.schritt, false)), 'font-size="30" fill="#c9d2de" text-anchor="middle" font-weight="700"')}
+    ${t(286, 172, esc(w.neben.einheit), 'font-size="12" fill="#8b95a5" text-anchor="middle" font-weight="700"')}` : '';
+  const zyklus = 1 + ((item.deko || 0) % 5);
+  return `
+    <defs><linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#363d48"/><stop offset="1" stop-color="#1a1f27"/></linearGradient></defs>
+    <rect x="24" y="22" width="352" height="256" rx="30" fill="url(#${id}g)" stroke="#11151b" stroke-width="2"/>
+    <rect x="24" y="22" width="352" height="22" rx="11" fill="#f08a24"/>
+    ${t(200, 38, 'REANIMATION · FEEDBACK', 'font-size="11" fill="#1a1f27" text-anchor="middle" font-weight="800" letter-spacing="2"')}
+    <rect x="44" y="58" width="312" height="190" rx="14" fill="#06090d" stroke="#2a313c" stroke-width="2"/>
+    <rect x="56" y="72" width="164" height="162" rx="10" fill="#0f1620" stroke="#f08a24" stroke-width="2.5"/>
+    ${t(138, 96, esc(p.kurz.toUpperCase()), 'font-size="12" fill="#f8b46a" text-anchor="middle" font-weight="800" letter-spacing="1"')}
+    ${t(138, 172, esc(zahl(item.w, p.schritt, false)), `font-size="${item.w >= 100 ? 62 : 66}" fill="#ffffff" text-anchor="middle" font-weight="700" letter-spacing="-1"`)}
+    ${t(138, 204, esc(p.einheit), 'font-size="16" fill="#f8b46a" text-anchor="middle" font-weight="700"')}
+    <rect x="228" y="72" width="116" height="122" rx="10" fill="#0c1118" stroke="#262d38" stroke-width="2"/>
+    ${neben}
+    ${t(286, 222, 'Zyklus ' + zyklus + ' · 30:2', 'font-size="11" fill="#8b95a5" text-anchor="middle" font-weight="700"')}`;
+}
+
+// Fingerkuppe nach dem Drücken und Stoppuhr
+function rekap(item, p) {
+  const id = 'g' + (++uid);
+  const an = '#1d2719', aus = 'rgba(29,39,25,.07)';
+  return `
+    <defs>
+      <linearGradient id="${id}h" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e9b38f"/><stop offset=".5" stop-color="#f6cbac"/><stop offset="1" stop-color="#dba07c"/></linearGradient>
+      <radialGradient id="${id}n" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#f1d3cf"/></radialGradient>
+    </defs>
+    <path d="M40,300 L40,110 C40,52 160,52 160,110 L160,300Z" fill="url(#${id}h)" stroke="#b77d5c" stroke-width="2.5"/>
+    <path d="M62,128 C62,82 138,82 138,128 L138,168 C138,180 62,180 62,168Z" fill="url(#${id}n)" stroke="#d7a99e" stroke-width="2"/>
+    <path d="M56,228 C80,236 120,236 144,228" stroke="#c38a69" stroke-width="2" fill="none" opacity=".6"/>
+    ${t(100, 206, 'Nagelbett', 'font-size="11" fill="#7a4a33" text-anchor="middle" font-weight="700"')}
+    <path d="M100,22 L100,52" stroke="#55606c" stroke-width="3"/><path d="M90,42 L100,54 L110,42" fill="none" stroke="#55606c" stroke-width="3"/>
+    ${t(100, 16, 'drücken – loslassen', 'font-size="11" fill="#55606c" text-anchor="middle" font-weight="700"')}
+    <rect x="262" y="36" width="36" height="22" rx="5" fill="#3a4554"/>
+    <circle cx="280" cy="164" r="104" fill="#2f3a48" stroke="#1d2530" stroke-width="3"/>
+    <circle cx="280" cy="164" r="88" fill="#dfe6ec"/>
+    <rect x="212" y="122" width="136" height="80" rx="10" fill="#c5d2bd" stroke="#93a287" stroke-width="3"/>
+    ${seg7(lcdZahl(item.w, p), 316, 134, 54, 2, an, aus)}
+    ${t(332, 186, 's', `font-size="20" fill="${an}" font-weight="800"`)}
+    ${t(280, 112, 'STOPPUHR', 'font-size="10" fill="#55606c" text-anchor="middle" font-weight="800" letter-spacing="2"')}
+    ${t(280, 226, 'bis wieder rosig', 'font-size="11" fill="#55606c" text-anchor="middle" font-weight="700"')}`;
+}
+
+// Peak-Flow-Meter mit Zeiger und Eintrag im Asthma-Tagebuch (ohne farbige Zonen, sonst wäre die Antwort verraten)
+function peakflow(item, p) {
+  const id = 'g' + (++uid);
+  const d = item.deko || 0;
+  const best = 400 + (d % 21) * 10;
+  const heute = Math.round(best * item.w / 100 / 10) * 10;
+  const x = l => 72 + (Math.max(60, Math.min(800, l)) - 60) / 740 * 250;
+  let skala = '';
+  for (let l = 100; l <= 800; l += 50) {
+    skala += `<line x1="${x(l)}" y1="58" x2="${x(l)}" y2="${l % 100 ? 66 : 72}" stroke="#1d2b3a" stroke-width="${l % 100 ? 1 : 2}"/>`;
+    if (!(l % 100)) skala += t(x(l), 50, String(l), 'font-size="9" fill="#1d2b3a" text-anchor="middle" font-weight="700"');
+  }
+  return `
+    <defs><linearGradient id="${id}r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7fafc"/><stop offset="1" stop-color="#cdd8e2"/></linearGradient></defs>
+    <rect x="8" y="64" width="54" height="40" rx="10" fill="#7d8b99" stroke="#5c6875" stroke-width="2"/>
+    <rect x="54" y="34" width="290" height="98" rx="40" fill="url(#${id}r)" stroke="#9fb0bd" stroke-width="3"/>
+    ${skala}
+    ${t(334, 120, 'l/min', 'font-size="9" fill="#55606c" text-anchor="end" font-weight="700"')}
+    <path d="M${x(heute)},74 l-9,22 l18,0z" fill="#d6402f" stroke="#9a2a1e" stroke-width="1.5"/>
+    <rect x="${x(heute) - 2}" y="94" width="4" height="22" fill="#d6402f"/>
+    <rect x="20" y="148" width="360" height="132" rx="10" fill="#fffdf6" stroke="#e1d9bf" stroke-width="2"/>
+    ${t(36, 172, 'Asthma-Tagebuch', 'font-size="13" fill="#1d2b3a" font-weight="800"')}
+    ${t(36, 200, 'Persönlicher Bestwert:', 'font-size="12" fill="#55606c" font-weight="600"')}
+    ${t(196, 200, best + ' l/min', 'font-size="12" fill="#1d2b3a" font-weight="800"')}
+    ${t(36, 222, 'Heute gemessen:', 'font-size="12" fill="#55606c" font-weight="600"')}
+    ${t(196, 222, heute + ' l/min', 'font-size="12" fill="#1d2b3a" font-weight="800"')}
+    ${t(36, 260, 'vom Bestwert:', 'font-size="13" fill="#55606c" font-weight="700"')}
+    ${t(364, 262, esc(zahl(item.w, p.schritt)) + ' %', 'font-size="44" fill="#1d2b3a" text-anchor="end" font-weight="800"')}`;
+}
+
+// Perzentilenkurve (vereinfacht): BMI nach Alter, Linien für die 3./10./50./90./97. Perzentile
+function probit(q) {
+  const a = [-39.69683028665376, 220.9460984245205, -275.9285104469687, 138.357751867269, -30.66479806614716, 2.506628277459239];
+  const b = [-54.47609879822406, 161.5858368580409, -155.6989798598866, 66.80131188771972, -13.28068155288572];
+  const c = [-0.007784894002430293, -0.3223964580411365, -2.400758277161838, -2.549671500253125, 4.374664141464968, 2.938163982698783];
+  const dd = [0.007784695709041462, 0.3224671290700398, 2.445134137142996, 3.754408661907416];
+  const rand = r => (((((c[0] * r + c[1]) * r + c[2]) * r + c[3]) * r + c[4]) * r + c[5]) / ((((dd[0] * r + dd[1]) * r + dd[2]) * r + dd[3]) * r + 1);
+  if (q < 0.02425) return rand(Math.sqrt(-2 * Math.log(q)));
+  if (q > 0.97575) return -rand(Math.sqrt(-2 * Math.log(1 - q)));
+  const r0 = q - 0.5, r = r0 * r0;
+  return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * r0 / (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+}
+const MEDIAN = [[2, 16.0], [4, 15.6], [6, 15.4], [8, 15.9], [10, 16.8], [12, 17.9], [14, 19.1], [16, 20.3], [18, 21.3]];
+function bmiKurve(alter, perz) {
+  let m = MEDIAN[MEDIAN.length - 1][1];
+  for (let i = 1; i < MEDIAN.length; i++) if (alter <= MEDIAN[i][0]) { const [x0, y0] = MEDIAN[i - 1], [x1, y1] = MEDIAN[i]; m = y0 + (y1 - y0) * (alter - x0) / (x1 - x0); break; }
+  return m * Math.exp(probit(perz / 100) * (0.085 + 0.0045 * alter));
+}
+function perzentile(item, p) {
+  const d = item.deko || 0;
+  const alter = 3 + (d % 15), maedchen = d % 2 === 0;
+  const X = a => 58 + (a - 2) / 16 * 300, Y = b => 238 - (b - 12) / 22 * 196;
+  let gitter = '';
+  for (let a = 2; a <= 18; a += 2) gitter += `<line x1="${X(a)}" y1="42" x2="${X(a)}" y2="238" stroke="#e6e9ee" stroke-width="1"/>` + t(X(a), 252, String(a), 'font-size="9" fill="#55606c" text-anchor="middle" font-weight="600"');
+  for (let bmi = 14; bmi <= 34; bmi += 4) gitter += `<line x1="58" y1="${Y(bmi)}" x2="358" y2="${Y(bmi)}" stroke="#e6e9ee" stroke-width="1"/>` + t(52, Y(bmi) + 3, String(bmi), 'font-size="9" fill="#55606c" text-anchor="end" font-weight="600"');
+  let kurven = '';
+  for (const k of [3, 10, 50, 90, 97]) {
+    let dpath = '';
+    for (let a = 2; a <= 18.001; a += 0.5) dpath += (dpath ? ' L' : 'M') + X(a).toFixed(1) + ',' + Y(bmiKurve(a, k)).toFixed(1);
+    kurven += `<path d="${dpath}" fill="none" stroke="${k === 50 ? '#1d2b3a' : '#7d8b99'}" stroke-width="${k === 50 ? 2.2 : 1.5}" ${k === 3 || k === 97 ? 'stroke-dasharray="5 3"' : ''}/>`;
+    kurven += t(362, Y(bmiKurve(18, k)) + 3, String(k), 'font-size="9" fill="#55606c" font-weight="700"');
+  }
+  const bmi = bmiKurve(alter, item.w);
+  return `
+    <rect x="6" y="4" width="388" height="292" rx="10" fill="#ffffff" stroke="#d6d9e0" stroke-width="2"/>
+    ${t(16, 24, 'BMI-Perzentilen (vereinfacht)', 'font-size="12" fill="#1d2b3a" font-weight="800"')}
+    ${t(384, 24, maedchen ? 'Mädchen' : 'Jungen', 'font-size="11" fill="#55606c" text-anchor="end" font-weight="700"')}
+    ${gitter}
+    <line x1="58" y1="238" x2="358" y2="238" stroke="#55606c" stroke-width="1.5"/><line x1="58" y1="42" x2="58" y2="238" stroke="#55606c" stroke-width="1.5"/>
+    ${t(208, 270, 'Alter (Jahre)', 'font-size="9" fill="#55606c" text-anchor="middle" font-weight="700"')}
+    ${t(18, 140, 'BMI', 'font-size="9" fill="#55606c" font-weight="700" transform="rotate(-90 18 140)"')}
+    ${kurven}
+    <circle cx="${X(alter)}" cy="${Y(bmi)}" r="6.5" fill="#d6402f" stroke="#fff" stroke-width="2"/>
+    <rect x="66" y="48" width="${maedchen ? 168 : 158}" height="50" rx="8" fill="#fff7e8" stroke="#f3d39b" stroke-width="1.5"/>
+    ${t(76, 66, (maedchen ? 'Mädchen' : 'Junge') + ', ' + alter + ' Jahre · BMI ' + zahl(Math.round(bmi * 10) / 10, 0.1), 'font-size="10.5" fill="#1d2b3a" font-weight="600"')}
+    ${t(76, 90, esc(zahl(item.w, 1)) + '. Perzentile', 'font-size="19" fill="#1d2b3a" font-weight="800"')}`;
+}
+
 // Ausschnitt je Gerät (schmale Geräte werden so größer dargestellt)
 const AUSSCHNITT = { bz: '62 0 276 300', spo2: '0 20 400 268' };
 function waage(item, p) {
@@ -262,7 +429,7 @@ function waage(item, p) {
     ${t(326, 197, 'HOLD', 'font-size="8" fill="#55606c" text-anchor="middle" font-weight="800"')}`;
 }
 
-const GERAETE = { waage, ekg: (i, p) => monitor(i, p, 'ekg'), atmung: (i, p) => monitor(i, p, 'atmung'), spo2: pulsoximeter, rr: blutdruck, thermometer, bz: bzGeraet, labor: laborbefund };
+const GERAETE = { urin: urinBehaelter, cpr, rekap, peakflow, perzentile, waage, ekg: (i, p) => monitor(i, p, 'ekg'), atmung: (i, p) => monitor(i, p, 'atmung'), spo2: pulsoximeter, rr: blutdruck, thermometer, bz: bzGeraet, labor: laborbefund };
 
 // Das fertige SVG für einen Wert
 export function geraet(item) {

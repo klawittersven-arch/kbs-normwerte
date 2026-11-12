@@ -8,8 +8,8 @@ import { NORMWERTE } from './normwerte.js';
 export const KATEGORIEN = ['niedrig', 'normal', 'hoch'];
 export const KAT_TEXT = { niedrig: 'zu niedrig', normal: 'normal', hoch: 'zu hoch' };
 export const KAT_ZEICHEN = { niedrig: '▼', normal: '●', hoch: '▲' };
-export const GRUPPEN = { vital: 'Vitalzeichen', labor: 'Laborwerte' };
-export const ANZEIGEN = ['ekg', 'atmung', 'spo2', 'rr', 'thermometer', 'bz', 'labor', 'waage'];
+export const GRUPPEN = { vital: 'Vitalzeichen', labor: 'Laborwerte', notfall: 'Notfall & Kinder' };
+export const ANZEIGEN = ['ekg', 'atmung', 'spo2', 'rr', 'thermometer', 'bz', 'labor', 'waage', 'urin', 'cpr', 'rekap', 'peakflow', 'perzentile'];
 
 export const STUFEN = ['deutlich', 'knapp'];
 export const STUFE_TEXT = {
@@ -52,7 +52,7 @@ export function pruefe(p) {
   if (typeof p.id !== 'string' || !/^[a-z0-9_-]{1,20}$/.test(p.id)) f.push('id fehlt oder enthält Sonderzeichen');
   if (typeof p.name !== 'string' || !p.name.trim()) f.push('name fehlt');
   if (typeof p.kurz !== 'string' || !p.kurz.trim()) f.push('kurz fehlt');
-  if (!GRUPPEN[p.gruppe]) f.push("gruppe muss 'vital' oder 'labor' sein");
+  if (!GRUPPEN[p.gruppe]) f.push('gruppe muss eines davon sein: ' + Object.keys(GRUPPEN).map(g => "'" + g + "'").join(', '));
   if (!ANZEIGEN.includes(p.anzeige)) f.push('anzeige muss eines davon sein: ' + ANZEIGEN.join(', '));
   if (typeof p.einheit !== 'string') f.push('einheit fehlt');
   if (!zahlOk(p.schritt) || p.schritt <= 0) f.push('schritt muss eine Zahl größer als 0 sein');
@@ -109,7 +109,8 @@ export function zahl(v, s, gruppen = true) {
   if (gruppen && ganz.length > 3) ganz = ganz.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   return (v < 0 ? '−' : '') + ganz + (rest ? ',' + rest : '');
 }
-const einheitMit = (txt, e) => !e ? txt : e.startsWith('/') ? txt + e : txt + ' ' + e;
+// „128/min“, „89 %“, „95. Perzentile“
+const einheitMit = (txt, e) => !e ? txt : (e.startsWith('/') || e.startsWith('.')) ? txt + e : txt + ' ' + e;
 
 // „RR 85/50 mmHg“, „SpO₂ 89 %“, „HF 128/min“
 export function wertZahl(item, p) {
@@ -125,7 +126,7 @@ export function normalText(p, sex) {
   if (p.normalText) return p.normalText;
   const n = normBereich(p, sex);
   // So viele Nachkommastellen wie nötig: „12–16“, „3,5–5,0“, „2,2–2,6“
-  const bis = nb => { const s = Math.pow(10, -Math.max(...nb.map(v => stellen(v)))); return zahl(nb[0], s) + '–' + zahl(nb[1], s); };
+  const bis = nb => { const s = Math.pow(10, -Math.max(...nb.map(v => stellen(v)))); return nb[0] === 0 ? 'bis ' + zahl(nb[1], s) : zahl(nb[0], s) + '–' + zahl(nb[1], s); };
   const b = bis(n);
   if (p.anzeige === 'rr' && p.dia) return b + ' / ' + bis(p.dia.normal) + ' ' + p.einheit;
   const vor = sex === 'w' && p.normalFrau ? 'Frauen: ' : sex === 'm' && p.normalMann ? 'Männer: ' : '';

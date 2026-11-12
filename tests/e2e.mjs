@@ -243,26 +243,35 @@ try {
   const nachlesen = await T.$$eval('.seqcard .aufl .wt', els => els.map(e => e.textContent));
   if (!nachlesen.length || !/K⁺|Na⁺|Hb|Leukos|Thrombos|CRP|Krea|Quick/.test(nachlesen[0])) throw new Error('Laborwert erwartet: ' + nachlesen.join());
 
-  // ---------------- Drittes Finale: nur die Zusatzoption BMI (Knopf an, alle Laborwerte aus)
-  if (WERTE.some(p => p.id === 'bmi')) {
+  // ---------------- Drittes Finale: Gruppe „Notfall & Kinder“ (Knopf „alle“) plus BMI, Vital- und Laborwerte per „keine“ aus
+  if (WERTE.some(p => p.gruppe === 'notfall')) {
     await T.click('#btnOther');
     await T.waitForSelector('#wchips .wchip');
-    await T.click('#wchips .wchip:text-is("BMI")');
-    for (const p of WERTE.filter(x => x.gruppe === 'labor')) await T.click(`#wchips .wchip:text-is("${p.kurz}")`);
-    const an = await T.$$eval('#wchips .wchip', els => els.filter(e => e.getAttribute('aria-pressed') === 'true').map(e => e.textContent).join(','));
-    if (an !== 'BMI') throw new Error('Nur BMI erwartet, ausgewählt: ' + an);
+    await T.click('.wmini[data-gruppe="notfall"]:text-is("alle")');
+    await T.click('.wmini[data-gruppe="labor"]:text-is("keine")');
+    await T.click('.wmini[data-gruppe="vital"]:text-is("keine")');
+    if (WERTE.some(p => p.id === 'bmi')) await T.click('#wchips .wchip:text-is("BMI")');
+    await T.click('.seg[aria-label="Leben im Finale"] button:has-text("3 Leben")');
+    const soll = WERTE.filter(p => p.gruppe === 'notfall' || p.id === 'bmi').map(p => p.kurz);
+    const an = await T.$$eval('#wchips .wchip', els => els.filter(e => e.getAttribute('aria-pressed') === 'true').map(e => e.textContent));
+    if (an.join() !== WERTE.filter(p => soll.includes(p.kurz)).map(p => p.kurz).join()) throw new Error('Auswahl falsch: ' + an.join());
     await sleep(600);
     await T.keyboard.press('Enter');
-    await T.waitForFunction(() => window.__nwTest.final && window.__nwTest.final.round === 1 && document.querySelector('#fGeraet svg'), null, { timeout: 30000 });
-    await sleep(500);
-    await T.screenshot({ path: path.join(OUT, '18b-beamer-finale-bmi.png') });
-    const bmi = await T.getAttribute('#fGeraet svg', 'aria-label');
-    log('Finale 3 (nur BMI), Wert 1:', bmi);
-    if (!/BMI \d+,\d kg\/m²/.test(bmi)) throw new Error('BMI erwartet: ' + bmi);
-    const kat3 = await T.evaluate(() => window.__nwTest.final.kat);
-    await offen(phones.Lena.p); await offen(phones.Tom.p);
-    await antworte(phones.Lena.p, kat3);
-    await antworte(phones.Tom.p, falsch(kat3), true);
+    const gesehen = [];
+    for (let r = 1; r <= 3; r++) {
+      await T.waitForFunction(r => window.__nwTest.final && window.__nwTest.final.round === r && document.querySelector('#fGeraet svg'), r, { timeout: 30000 });
+      await sleep(500);
+      await T.screenshot({ path: path.join(OUT, `18${'bcd'[r - 1]}-beamer-finale-notfall.png`) });
+      const label = await T.getAttribute('#fGeraet svg', 'aria-label');
+      gesehen.push(label);
+      if (!soll.some(k => label.includes(': ' + k + ' '))) throw new Error('Wert außerhalb der Auswahl: ' + label);
+      const kat3 = await T.evaluate(() => window.__nwTest.final.kat);
+      await offen(phones.Lena.p); await offen(phones.Tom.p);
+      await antworte(phones.Lena.p, kat3);
+      await antworte(phones.Tom.p, falsch(kat3), r === 2);
+      if (r < 3) await T.waitForSelector('#fAufl:not([hidden])', { timeout: 20000 });
+    }
+    log('Finale 3 (Notfall & Kinder + BMI):', gesehen.join(' | '));
     await T.waitForSelector('.winner', { timeout: 30000 });
     const p3 = await T.$$eval('.places li', els => els.map(e => e.textContent.trim()));
     log('Plätze', p3.join(' | '));

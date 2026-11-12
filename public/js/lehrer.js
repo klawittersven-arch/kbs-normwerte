@@ -6,6 +6,7 @@ import {
 } from './regeln.js';
 import { Ton } from './ton.js';
 import { esc, herzenHTML, zeigeWert, zeitbalken, aufloesung, richtigText } from './ui.js';
+import { cprWerte } from './geraete.js';
 
 const $ = s => document.querySelector(s);
 const view = $('#view'), netdot = $('#netdot'), codeChip = $('#codeChip'), toastEl = $('#toast');
@@ -140,11 +141,27 @@ function optionen(el, mitFinale) {
   add('Werte', seg('Werte', [['vital', GRUPPEN.vital], ['labor', GRUPPEN.labor], ['alle', 'Beides']], werteWahl(), g => { setCfg({ ids: gruppeIds(g) }); chips(); }));
   const chipBox = document.createElement('div'); chipBox.className = 'wchips'; chipBox.id = 'wchips';
   el.appendChild(chipBox);
+  const segAuffrischen = () => el.querySelectorAll('.seg[aria-label="Werte"] button').forEach((x, i) => x.setAttribute('aria-checked', String(['vital', 'labor', 'alle'][i] === werteWahl())));
   function chips() {
     chipBox.innerHTML = '';
     for (const [g, name] of Object.entries(GRUPPEN)) {
-      const l = document.createElement('span'); l.className = 'glbl'; l.textContent = name + ':'; chipBox.appendChild(l);
-      for (const p of WERTE.filter(x => x.gruppe === g)) {
+      const inGruppe = WERTE.filter(x => x.gruppe === g);
+      if (!inGruppe.length) continue;
+      const zeile = document.createElement('div'); zeile.className = 'wgruppe'; chipBox.appendChild(zeile);
+      const l = document.createElement('span'); l.className = 'glbl'; l.textContent = name + ':'; zeile.appendChild(l);
+      // Ganze Gruppe an- oder abwählen
+      for (const [txt, an] of [['alle', true], ['keine', false]]) {
+        const m = document.createElement('button');
+        m.type = 'button'; m.className = 'wmini'; m.textContent = txt; m.dataset.gruppe = g;
+        m.title = name + ': ' + (an ? 'alle Werte auswählen' : 'alle Werte abwählen');
+        m.onclick = () => {
+          const ids = alleIds().filter(id => inGruppe.some(p => p.id === id) ? an : cfg.ids.includes(id));
+          if (!ids.length) return toast('Mindestens ein Wert muss ausgewählt sein.');
+          setCfg({ ids }); chips(); segAuffrischen();
+        };
+        zeile.appendChild(m);
+      }
+      for (const p of inGruppe) {
         const b = document.createElement('button');
         b.type = 'button'; b.className = 'wchip' + (p.standard === false ? ' extra' : ''); b.textContent = p.kurz;
         b.title = p.name + (p.standard === false ? ' (Zusatzoption: nur wenn hier ausgewählt)' : '');
@@ -153,10 +170,9 @@ function optionen(el, mitFinale) {
           const on = cfg.ids.includes(p.id);
           if (on && cfg.ids.length === 1) return toast('Mindestens ein Wert muss ausgewählt sein.');
           setCfg({ ids: alleIds().filter(id => id === p.id ? !on : cfg.ids.includes(id)) });
-          chips();
-          el.querySelectorAll('.seg[aria-label="Werte"] button').forEach((x, i) => x.setAttribute('aria-checked', String(['vital', 'labor', 'alle'][i] === werteWahl())));
+          chips(); segAuffrischen();
         };
-        chipBox.appendChild(b);
+        zeile.appendChild(b);
       }
     }
   }
@@ -405,6 +421,7 @@ const rundenKopf = r => `Wert ${r}<small>${r >= SUDDEN_DEATH_AB ? 'Sudden Death:
 function geraeteTon(item) {
   const p = wert(item.id); if (!p) return;
   if (p.anzeige === 'ekg') Ton.startPuls(item.w, 'monitor');
+  else if (p.anzeige === 'cpr') { const w = cprWerte(item); Ton.startPuls(p.einheit === '/min' ? item.w : (w.nebenWert || 110), 'metronom'); }
   else if (p.anzeige === 'spo2') Ton.startPuls(item.puls || 75, 'oxi');
   else if (p.anzeige === 'labor') Ton.drucker();
   else if (p.anzeige !== 'atmung') Ton.fertig();

@@ -31,13 +31,14 @@ export const Ton = {
   // Gerätegeräusche
   monitorPiep() { this._osc(988, 0, 0.07, 'sine', 0.16); },              // Herzschlag am Monitor
   oxiPiep() { this._osc(880, 0, 0.06, 'sine', 0.12); },                  // Pulsoximeter
+  klick() { this._osc(1600, 0, 0.03, 'square', 0.08); },                // Metronom der Herzdruckmassage
   fertig() { this._osc(2093, 0, 0.09, 'square', 0.06); this._osc(2093, 0.14, 0.09, 'square', 0.06); }, // Messung fertig
   drucker() { for (let i = 0; i < 6; i++) this._osc(180 + (i % 2) * 40, i * 0.05, 0.04, 'square', 0.03); },
   // Takt für Herzschlag/Puls: alle 60/bpm Sekunden ein Piep, bis stopPuls()
   startPuls(bpm, art) {
     this.stopPuls();
-    const ms = Math.max(240, 60000 / Math.max(bpm, 1));
-    const piep = () => (art === 'oxi' ? this.oxiPiep() : this.monitorPiep());
+    const ms = Math.max(200, 60000 / Math.max(bpm, 1));
+    const piep = () => (art === 'oxi' ? this.oxiPiep() : art === 'metronom' ? this.klick() : this.monitorPiep());
     piep();
     pulsT = setInterval(piep, ms);
   },
